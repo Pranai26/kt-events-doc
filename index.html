@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KT Doc | Events Management</title>
+<style>
+  :root {
+    --ground:       #0D1B2A;
+    --surface:      #152334;
+    --surface-2:    #1C2F45;
+    --surface-3:    #223352;
+    --text:         #E2EAF4;
+    --muted:        #8BA3BE;
+    --accent:       #F0A500;
+    --accent-dim:   rgba(240,165,0,0.10);
+    --accent-2:     #5B9BD5;
+    --accent-2-dim: rgba(91,155,213,0.10);
+    --danger:       #E05555;
+    --danger-dim:   rgba(224,85,85,0.10);
+    --success:      #3DAA78;
+    --success-dim:  rgba(61,170,120,0.10);
+    --border:       rgba(255,255,255,0.06);
+    --font-body:    'Segoe UI', system-ui, -apple-system, sans-serif;
+    --font-mono:    'Cascadia Code', 'Consolas', 'Courier New', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    html, body { background-color: #0D1B2A !important; }
+    .hero-title .cursor { display: none; }
+    a { text-decoration: none; }
+  }
+
+  body {
+    background-color: var(--ground);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── TOP STRIPE ── */
+  .top-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent) 0%, #C87800 55%, var(--accent-2) 100%);
+  }
+
+  /* ── WRAPPER ── */
+  .doc { max-width: 860px; margin: 0 auto; padding: 0 32px 100px; }
+
+  /* ── HERO ── */
+  .hero { padding: 56px 0 44px; border-bottom: 1px solid var(--border); }
+
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 7px; height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .hero-title {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  .hero-title .cursor {
+    display: inline-block;
+    width: 3px; height: 0.85em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    margin-left: 4px;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-title .cursor { animation: none; opacity: 0; }
+  }
+
+  .hero-subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 580px;
+    margin-bottom: 30px;
+  }
+
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 0;
+  }
+
+  .video-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-2);
+    color: var(--accent-2);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 10px 16px;
+    border-radius: 5px;
+    transition: background 0.15s;
+  }
+
+  .video-chip:hover, .video-chip:focus { background: var(--surface-2); outline: 2px solid var(--accent-2); outline-offset: 2px; }
+  .video-chip svg { flex-shrink: 0; }
+
+  /* ── TABLE OF CONTENTS ── */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 24px 28px;
+    margin: 36px 0;
+  }
+
+  .toc-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .toc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toc-list li { display: flex; gap: 12px; align-items: baseline; }
+
+  .toc-list a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.12s;
+  }
+
+  .toc-list a:hover { color: var(--text); }
+
+  .toc-num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--accent);
+    flex-shrink: 0;
+    min-width: 18px;
+  }
+
+  /* ── OVERVIEW ── */
+  .overview { padding: 36px 0; border-bottom: 1px solid var(--border); }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    opacity: 0.7;
+  }
+
+  .overview p { font-size: 15px; color: var(--muted); max-width: 680px; }
+  .overview p + p { margin-top: 12px; }
+
+  /* ── BREADCRUMB ── */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 14px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .breadcrumb span { color: var(--accent-2); }
+  .breadcrumb .sep { opacity: 0.4; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 15px 18px;
+    border-radius: 5px;
+    margin: 22px 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .callout.warning { background: var(--accent-dim);   border-left: 3px solid var(--accent);   color: #D4B870; }
+  .callout.info    { background: var(--accent-2-dim); border-left: 3px solid var(--accent-2); color: #8BBDE8; }
+  .callout.danger  { background: var(--danger-dim);   border-left: 3px solid var(--danger);   color: #E88888; }
+  .callout.success { background: var(--success-dim);  border-left: 3px solid var(--success);  color: #6DD4A8; }
+
+  .callout-icon { flex-shrink: 0; font-size: 15px; margin-top: 1px; }
+
+  /* ── STEPS SECTION ── */
+  .steps-section { padding: 40px 0; }
+  .steps-section > .section-label { margin-bottom: 28px; }
+
+  /* ── STEP CARD ── */
+  .step-card {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .step-rail {
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 22px;
+  }
+
+  .step-num {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .step-rail-line {
+    width: 1px; flex: 1;
+    background: var(--border);
+    margin: 14px 0;
+  }
+
+  .step-body { padding: 22px 28px 30px; }
+
+  .step-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .step-desc {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 22px;
+    max-width: 640px;
+  }
+
+  /* ── SUB-SECTION HEADING within a step ── */
+  .sub-heading {
+    font-size: 12px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--accent-2);
+    margin: 24px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── SUB-STEPS ── */
+  .substeps {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .substeps li {
+    display: flex;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--text);
+    align-items: flex-start;
+  }
+
+  .sub-marker {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-radius: 3px;
+    padding: 3px 7px;
+    flex-shrink: 0;
+    margin-top: 3px;
+    min-width: 34px;
+    text-align: center;
+  }
+
+  .substeps li .note {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── FIELD TABLE ── */
+  .field-table-wrap { overflow-x: auto; margin: 18px 0; }
+
+  .field-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+  .field-table th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+    padding: 9px 12px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .field-table td { padding: 11px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+
+  .field-table td:first-child {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent-2);
+    white-space: nowrap;
+  }
+
+  .field-table td:nth-child(2) { color: var(--muted); }
+  .field-table td:last-child  { color: var(--text); font-size: 13px; }
+  .field-table tr:last-child td { border-bottom: none; }
+
+  /* ── BADGE ── */
+  .badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    vertical-align: middle;
+  }
+
+  .badge.required { background: rgba(224,85,85,0.15); color: #E88888; }
+  .badge.optional { background: rgba(91,155,213,0.12); color: #8BBDE8; }
+  .badge.default  { background: rgba(61,170,120,0.12); color: #6DD4A8; }
+
+  /* ── CODE / CONFIG BLOCK ── */
+  .code-block {
+    background: var(--ground);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 16px 20px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: #C5D8E8;
+    margin: 16px 0;
+    overflow-x: auto;
+    line-height: 1.85;
+  }
+
+  .code-block .k { color: #9ECBFF; }
+  .code-block .v { color: var(--accent); }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface-2);
+    color: var(--accent-2);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── SCREENSHOT PLACEHOLDER ── */
+  .screenshot {
+    border: 1.5px dashed rgba(91,155,213,0.22);
+    border-radius: 6px;
+    background: rgba(12,24,38,0.5);
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  .screenshot svg { opacity: 0.28; }
+
+  .screenshot-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--accent-2);
+    opacity: 0.6;
+  }
+
+  .screenshot-desc {
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 440px;
+    opacity: 0.7;
+  }
+
+  /* ── ACTION PAIR (approve / reject) ── */
+  .action-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 22px 0;
+  }
+
+  .action-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+
+  .action-card.approve { border-top: 3px solid var(--success); }
+  .action-card.reject  { border-top: 3px solid var(--danger);  }
+
+  .action-card-title {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 14px;
+  }
+
+  .action-card.approve .action-card-title { color: var(--success); }
+  .action-card.reject  .action-card-title { color: var(--danger);  }
+
+  .action-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .action-card ul li { display: flex; gap: 8px; }
+
+  .action-card ul li::before {
+    content: '→';
+    font-family: var(--font-mono);
+    color: var(--muted);
+    opacity: 0.45;
+    flex-shrink: 0;
+  }
+
+  /* ── INFO GRID (2-col facts) ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 20px 0;
+  }
+
+  .info-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 18px;
+  }
+
+  .info-card-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .info-card-value {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ── STUDENT EXPERIENCE ── */
+  .student-section { padding: 44px 0; border-top: 1px solid var(--border); }
+
+  .stage-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 20px 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .stage-item {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stage-item:last-child { border-bottom: none; }
+
+  .stage-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    padding: 16px 10px;
+    background: var(--surface-2);
+    border-right: 1px solid var(--border);
+    color: var(--muted);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    min-width: 36px;
+  }
+
+  .stage-content { padding: 16px 20px; font-size: 14px; color: var(--muted); }
+  .stage-content strong { color: var(--text); }
+
+  /* ── TROUBLESHOOTING ── */
+  .troubleshoot-section { padding: 44px 0; border-top: 1px solid var(--border); }
+
+  .trouble-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .trouble-q {
+    padding: 14px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .trouble-q::before {
+    content: 'Q';
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 2px 7px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .trouble-a {
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .trouble-a::before {
+    content: 'A';
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--success);
+    background: var(--success-dim);
+    padding: 2px 7px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── QUICK REFERENCE ── */
+  .qr-section { padding: 44px 0 0; border-top: 1px solid var(--border); }
+
+  .qr-table-wrap { overflow-x: auto; margin-top: 20px; }
+
+  .qr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+  .qr-table th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .qr-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .qr-table td:first-child { color: var(--accent); font-weight: 600; }
+  .qr-table td:nth-child(2) { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+  .qr-table td:last-child { color: var(--accent-2); font-size: 13px; }
+  .qr-table tr:last-child td { border-bottom: none; }
+
+  /* ── FOOTER ── */
+  .doc-footer {
+    margin-top: 64px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .footer-org { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.1em; }
+  .footer-date { font-family: var(--font-mono); font-size: 11px; color: var(--muted); opacity: 0.4; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 620px) {
+    .doc { padding: 0 16px 60px; }
+    .hero-title { font-size: 26px; }
+    .step-card { grid-template-columns: 46px 1fr; }
+    .step-num { font-size: 16px; }
+    .step-body { padding: 16px 16px 22px; }
+    .action-pair, .info-grid { grid-template-columns: 1fr; }
+    .qr-table td, .qr-table th { padding: 9px 10px; }
+    .stage-tag { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+
+<div class="doc">
+
+  <!-- ═══ HERO ═══ -->
+  <header class="hero">
+    <div class="hero-eyebrow">NxtWave Admin Panel &nbsp;·&nbsp; Knowledge Transfer</div>
+    <h1 class="hero-title">Events Management<span class="cursor" aria-hidden="true"></span></h1>
+    <p class="hero-subtitle">
+      Complete admin walkthrough — from creating an event record to configuring registration and project
+      submission forms, and managing participant approvals end to end.
+    </p>
+    <div class="hero-meta">
+      <a class="video-chip" href="https://drive.google.com/file/d/1HPIK6xHHcsQ3JX-1PK5SJiAFKY1CL5oJ/view?usp=sharing" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="6.5" stroke="currentColor" stroke-width="1"/>
+          <path d="M5.5 4.5l4 2.5-4 2.5V4.5z" fill="currentColor"/>
+        </svg>
+        Watch Walkthrough Video
+      </a>
+    </div>
+  </header>
+
+  <!-- ═══ TABLE OF CONTENTS ═══ -->
+  <nav class="toc" aria-label="Table of contents">
+    <div class="toc-title">Contents</div>
+    <ul class="toc-list">
+      <li><span class="toc-num">00</span><a href="#overview">Overview &amp; Prerequisites</a></li>
+      <li><span class="toc-num">01</span><a href="#step-1">Create the Event</a></li>
+      <li><span class="toc-num">02</span><a href="#step-2">Add the Registration Form</a></li>
+      <li><span class="toc-num">03</span><a href="#step-3">Add the Project Submission Form</a></li>
+      <li><span class="toc-num">04</span><a href="#step-4">Approve a Registration</a></li>
+      <li><span class="toc-num">05</span><a href="#step-5">Reject a Registration</a></li>
+      <li><span class="toc-num">06</span><a href="#student-exp">Student Experience</a></li>
+      <li><span class="toc-num">07</span><a href="#troubleshoot">Troubleshooting</a></li>
+      <li><span class="toc-num">08</span><a href="#qr">Quick Reference Summary</a></li>
+    </ul>
+  </nav>
+
+  <!-- ═══ OVERVIEW ═══ -->
+  <section class="overview" id="overview">
+    <div class="section-label">Overview</div>
+    <p>
+      This document covers the full admin workflow for running an event on the NxtWave platform.
+      It is written for admin and ops staff who configure events from the Django Admin Panel.
+      Follow the steps in order — later steps depend on the Event ID and form configuration
+      completed in earlier ones.
+    </p>
+    <p>
+      The four core actions are: creating the event record, attaching a registration form,
+      attaching a project submission form (if applicable), and managing participant registrations
+      by approving or rejecting them.
+    </p>
+
+    <div class="callout warning" role="note">
+      <span class="callout-icon">📌</span>
+      <div>
+        <strong>Prerequisite — Certificate template must exist first.</strong> If the event awards a certificate,
+        the template must already be configured in the <strong>Poster Generation service</strong> via the Admin Panel
+        before you begin event setup. Once done, note the <strong>Certificate Name Enum</strong> — you will need
+        it when filling in the event form. If this has not been done, the certificate checkbox on the event
+        will have no effect.
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-card-label">Access Required</div>
+        <div class="info-card-value">Admin Panel login with NKB Events permissions</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Time to Complete</div>
+        <div class="info-card-value">~10–15 minutes for full event setup with both forms</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Sections in Admin Panel</div>
+        <div class="info-card-value">NKB Events → Events, Event Registrations</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Key Output</div>
+        <div class="info-card-value">Event ID (UUID from URL) — needed for certificate template data</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ STEPS ═══ -->
+  <section class="steps-section">
+    <div class="section-label">Configuration Steps</div>
+
+    <!-- ────────────────────────────────────────
+         STEP 1 — CREATE THE EVENT
+    ──────────────────────────────────────── -->
+    <article class="step-card" id="step-1">
+      <div class="step-rail">
+        <div class="step-num">01</div>
+        <div class="step-rail-line"></div>
+      </div>
+      <div class="step-body">
+        <h2 class="step-title">Create the Event</h2>
+        <p class="step-desc">
+          The event record is the foundation for everything else. Complete and save this step first —
+          the Event ID it generates is required for certificate configuration and form linking.
+        </p>
+
+        <div class="breadcrumb" aria-label="Navigation path">
+          Admin Panel <span class="sep">›</span>
+          <span>NKB Events</span> <span class="sep">›</span>
+          <span>Events</span> <span class="sep">›</span>
+          <span>Add Event</span>
+        </div>
+
+        <div class="sub-heading">Navigation</div>
+        <ol class="substeps">
+          <li>
+            <span class="sub-marker">01</span>
+            <span>Log in to the Admin Panel with your admin credentials.</span>
+          </li>
+          <li>
+            <span class="sub-marker">02</span>
+            <span>In the left sidebar, locate and click <strong>NKB Events</strong> to expand the section.</span>
+          </li>
+          <li>
+            <span class="sub-marker">03</span>
+            <span>Click <strong>Events</strong> from the expanded list. The Events list page opens.</span>
+          </li>
+          <li>
+            <span class="sub-marker">04</span>
+            <span>Click the <strong>Add Event</strong> button in the top-right corner of the page. The event creation form opens.</span>
+          </li>
+        </ol>
+
+        <div class="sub-heading">Filling in the Event Form</div>
+        <ol class="substeps">
+          <li>
+            <span class="sub-marker">05</span>
+            <span>
+              <strong>Event Name</strong> — Type the full name of the event exactly as students should see it on the platform.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">06</span>
+            <span>
+              <strong>Description</strong> — Click inside the description text area and enter the full event description. Include speaker details, agenda, format, and any other relevant information.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">07</span>
+            <span>
+              <strong>Start Date</strong> — Click the date field. A date picker appears. Select the date the event goes live. The field auto-fills on selection.
+              <span class="note">You can also type the date directly in the format shown (e.g. 2026-06-24). Click <em>Today</em> if the event starts today.</span>
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">08</span>
+            <span>
+              <strong>Start Time</strong> — Click the time field and enter the start time. Click <em>Now</em> to use the current time.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">09</span>
+            <span>
+              <strong>Duration</strong> — Enter the length of the event in hours. For a 2-hour event enter <code>2</code>. For 90 minutes enter <code>1.5</code>.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">10</span>
+            <span>
+              <strong>Visibility Status</strong> — Click the dropdown and select <code>PUBLIC</code> so students can find and access the event. Select <code>PRIVATE</code> if you are still building it and want to publish later.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">11</span>
+            <span>
+              <strong>Is Carousel Enabled</strong> — Tick this checkbox if the event should appear in the rotating banner on the student homepage. When ticked, a <strong>Carousel Start Datetime</strong> field appears — set the date and time from which the carousel should start showing this event.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">12</span>
+            <span>
+              <strong>Is Certificate Enabled</strong> — Tick this checkbox if students earn a certificate upon completing the event. Only tick this if the certificate template is already configured in the Poster Generation service.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">13</span>
+            <span>
+              <strong>Participation Type</strong> — Click the dropdown. Select <code>INDIVIDUAL</code> if each student registers alone, or <code>TEAM</code> if students register as a group.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">14</span>
+            <span>
+              <strong>Short Text</strong> — Enter a one-line tagline or brief description. This appears on the event card in the student app.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">15</span>
+            <span>
+              <strong>Enroll Plans Str</strong> — Enter the enrollment plan identifier that can access this event. For NIAT events enter <code>NIAT</code>. Leave blank to allow all plans.
+              <span class="note">If entering multiple plans, confirm the format with your tech lead before saving.</span>
+            </span>
+          </li>
+        </ol>
+
+        <div class="sub-heading">Saving &amp; Getting the Event ID</div>
+        <ol class="substeps">
+          <li>
+            <span class="sub-marker">16</span>
+            <span>Scroll to the bottom of the form. Click <strong>Save and continue editing</strong> — use this button, not plain <em>Save</em>, so you stay on the page.</span>
+          </li>
+          <li>
+            <span class="sub-marker">17</span>
+            <span>The page reloads with a green success message at the top confirming the event was saved.</span>
+          </li>
+          <li>
+            <span class="sub-marker">18</span>
+            <span>
+              Look at the browser's address bar. The URL will look like:
+              <div class="code-block" style="margin-top:10px;">/admin/nkb_event/event/<span class="v">52</span>/change/</div>
+              The number in the URL (e.g. <code>52</code>) is your <strong>Event ID</strong>. Copy and save it — you will need it for certificate template configuration.
+            </span>
+          </li>
+        </ol>
+
+        <div class="field-table-wrap">
+          <table class="field-table" aria-label="Event field reference">
+            <thead>
+              <tr><th>Field</th><th>What it does</th><th>Required?</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Event Name</td><td>Public-facing name shown to students on the event card and detail page.</td><td><span class="badge required">Required</span></td></tr>
+              <tr><td>Description</td><td>Full event description — shown on the event detail page.</td><td><span class="badge required">Required</span></td></tr>
+              <tr><td>Start Date / Time</td><td>Date and time the event becomes live and joinable.</td><td><span class="badge required">Required</span></td></tr>
+              <tr><td>Duration</td><td>Length of the event in hours (supports decimals, e.g. 1.5).</td><td><span class="badge required">Required</span></td></tr>
+              <tr><td>Visibility Status</td><td>PUBLIC makes it discoverable. PRIVATE hides it from students.</td><td><span class="badge required">Required</span></td></tr>
+              <tr><td>Participation Type</td><td>INDIVIDUAL (solo) or TEAM (group) registration.</td><td><span class="badge required">Required</span></td></tr>
+              <tr><td>Is Certificate Enabled</td><td>Enables certificate generation for students who meet the completion threshold.</td><td><span class="badge optional">Optional</span></td></tr>
+              <tr><td>Is Carousel Enabled</td><td>Shows this event in the homepage carousel banner.</td><td><span class="badge optional">Optional</span></td></tr>
+              <tr><td>Carousel Start Datetime</td><td>When the carousel starts displaying the event. Appears only when carousel is enabled.</td><td><span class="badge optional">Optional</span></td></tr>
+              <tr><td>Short Text</td><td>One-line tagline shown on the event card in the student app.</td><td><span class="badge optional">Optional</span></td></tr>
+              <tr><td>Enroll Plans Str</td><td>Restricts event access to specific enrollment plans (e.g. NIAT). Blank = all plans.</td><td><span class="badge optional">Optional</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="screenshot" role="img" aria-label="Screenshot placeholder">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <rect x="2" y="8" width="36" height="26" rx="3" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="7" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="3" fill="#5B9BD5" opacity="0.4"/>
+            <rect x="13" y="4" width="14" height="5" rx="1.5" stroke="#5B9BD5" stroke-width="1.5"/>
+          </svg>
+          <div class="screenshot-label">Screenshot — Step 1a</div>
+          <p class="screenshot-desc">Event creation form with all core fields filled in — Event Name, Description, Start Date/Time, Duration, and Visibility Status visible.</p>
+        </div>
+
+        <div class="screenshot" role="img" aria-label="Screenshot placeholder">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <rect x="2" y="8" width="36" height="26" rx="3" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="7" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="3" fill="#5B9BD5" opacity="0.4"/>
+            <rect x="13" y="4" width="14" height="5" rx="1.5" stroke="#5B9BD5" stroke-width="1.5"/>
+          </svg>
+          <div class="screenshot-label">Screenshot — Step 1b</div>
+          <p class="screenshot-desc">Browser address bar showing the Event ID in the URL after saving (e.g. /admin/nkb_event/event/52/change/).</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- ────────────────────────────────────────
+         STEP 2 — REGISTRATION FORM
+    ──────────────────────────────────────── -->
+    <article class="step-card" id="step-2">
+      <div class="step-rail">
+        <div class="step-num">02</div>
+        <div class="step-rail-line"></div>
+      </div>
+      <div class="step-body">
+        <h2 class="step-title">Add the Registration Form</h2>
+        <p class="step-desc">
+          The registration form is the sign-up form participants fill in before the event. It is
+          configured inline on the same event detail page — no separate admin object is needed.
+          Stay on the event detail page from Step 1 to continue.
+        </p>
+
+        <div class="breadcrumb" aria-label="Navigation path">
+          Admin Panel <span class="sep">›</span>
+          <span>NKB Events</span> <span class="sep">›</span>
+          <span>Events</span> <span class="sep">›</span>
+          <span>[Your Event]</span> <span class="sep">›</span>
+          <span>Registration Form Fields (inline)</span>
+        </div>
+
+        <div class="sub-heading">Adding Fields</div>
+        <ol class="substeps">
+          <li>
+            <span class="sub-marker">01</span>
+            <span>On the saved event detail page, scroll down past all the main event fields to the bottom of the page.</span>
+          </li>
+          <li>
+            <span class="sub-marker">02</span>
+            <span>Find the inline section titled <strong>Registration Form Fields</strong>.</span>
+          </li>
+          <li>
+            <span class="sub-marker">03</span>
+            <span>Click <strong>Add another Registration Form Field</strong>. A new row of inputs appears.</span>
+          </li>
+          <li>
+            <span class="sub-marker">04</span>
+            <span>
+              In the <strong>Field Label</strong> input, type what the participant will see — e.g. <code>Full Name</code>.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">05</span>
+            <span>
+              In the <strong>Field Type</strong> dropdown, select the appropriate input type. See the field type reference table below.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">06</span>
+            <span>
+              Tick the <strong>Is Required</strong> checkbox if this field must be completed before the form can be submitted.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">07</span>
+            <span>
+              If you selected <strong>Dropdown</strong> as the field type, an <strong>Options</strong> input appears.
+              Enter each option on a separate line — e.g. one city per line.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">08</span>
+            <span>
+              Click <strong>Add another Registration Form Field</strong> again to add the next field. Repeat steps 04–07 for each field you need.
+            </span>
+          </li>
+        </ol>
+
+        <div class="sub-heading">Setting the Registration Window</div>
+        <ol class="substeps">
+          <li>
+            <span class="sub-marker">09</span>
+            <span>
+              Find the <strong>Registration Open Date</strong> field. Set the date and time from which students can start submitting the registration form.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">10</span>
+            <span>
+              Find the <strong>Registration Close Date</strong> field. Set the date and time after which the form stops accepting new submissions. The form becomes inaccessible to students after this point.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">11</span>
+            <span>Scroll to the bottom and click <strong>Save</strong>. The registration form is now live and attached to your event.</span>
+          </li>
+        </ol>
+
+        <div class="field-table-wrap">
+          <table class="field-table" aria-label="Field type reference">
+            <thead>
+              <tr><th>Field Type</th><th>When to use</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Text</td><td>Single-line text input — names, emails, phone numbers, links.</td><td>Most common type. Use for any free-form short answer.</td></tr>
+              <tr><td>Textarea</td><td>Multi-line text — longer descriptions or answers.</td><td>Good for "Tell us about yourself" style questions.</td></tr>
+              <tr><td>Dropdown</td><td>Fixed list of choices — city, college, stream.</td><td>Enter each option on a new line in the Options field.</td></tr>
+              <tr><td>Checkbox</td><td>Boolean yes/no — agreement to terms, consent.</td><td>Returns true/false on submission.</td></tr>
+              <tr><td>File</td><td>Document or image upload — resume, portfolio.</td><td>Check file size limits with your tech lead before using.</td></tr>
+              <tr><td>URL</td><td>Link input — LinkedIn, GitHub, portfolio URL.</td><td>Validates that the value is a properly formatted URL.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout info" role="note">
+          <span class="callout-icon">ℹ️</span>
+          <div>
+            <strong>Recommended fields for most events:</strong> Full Name (Text, Required) · Email Address (Text, Required) · Mobile Number (Text, Required) · College / Organisation (Text, Optional). Only collect what you will actually use — shorter forms get higher completion rates.
+          </div>
+        </div>
+
+        <div class="screenshot" role="img" aria-label="Screenshot placeholder">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <rect x="2" y="8" width="36" height="26" rx="3" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="7" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="3" fill="#5B9BD5" opacity="0.4"/>
+            <rect x="13" y="4" width="14" height="5" rx="1.5" stroke="#5B9BD5" stroke-width="1.5"/>
+          </svg>
+          <div class="screenshot-label">Screenshot — Step 2</div>
+          <p class="screenshot-desc">Registration Form Fields inline section showing multiple configured fields (label, type, required column) and the Registration Open/Close Date fields.</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- ────────────────────────────────────────
+         STEP 3 — PROJECT SUBMISSION FORM
+    ──────────────────────────────────────── -->
+    <article class="step-card" id="step-3">
+      <div class="step-rail">
+        <div class="step-num">03</div>
+        <div class="step-rail-line"></div>
+      </div>
+      <div class="step-body">
+        <h2 class="step-title">Add the Project Submission Form</h2>
+        <p class="step-desc">
+          Configure this form only if your event requires participants to submit a project — for example,
+          a hackathon or a coding challenge. For virtual meetups, podcasts, and events with no submission
+          component, skip this step entirely.
+        </p>
+
+        <div class="breadcrumb" aria-label="Navigation path">
+          Admin Panel <span class="sep">›</span>
+          <span>NKB Events</span> <span class="sep">›</span>
+          <span>Events</span> <span class="sep">›</span>
+          <span>[Your Event]</span> <span class="sep">›</span>
+          <span>Project Submission Form Fields (inline)</span>
+        </div>
+
+        <ol class="substeps">
+          <li>
+            <span class="sub-marker">01</span>
+            <span>Stay on the event detail page. Scroll below the Registration Form Fields section to find <strong>Project Submission Form Fields</strong>.</span>
+          </li>
+          <li>
+            <span class="sub-marker">02</span>
+            <span>Click <strong>Add another Project Submission Form Field</strong>. A new row of inputs appears.</span>
+          </li>
+          <li>
+            <span class="sub-marker">03</span>
+            <span>Set the <strong>Field Label</strong>, <strong>Field Type</strong>, and <strong>Is Required</strong> for each field — same process as the Registration Form in Step 2.</span>
+          </li>
+          <li>
+            <span class="sub-marker">04</span>
+            <span>Add all the project fields your event requires. Refer to the recommended fields table below.</span>
+          </li>
+          <li>
+            <span class="sub-marker">05</span>
+            <span>
+              Set the <strong>Submission Deadline</strong> — the date and time by which all project submissions must be received.
+              <span class="note">Submissions after this timestamp are not accepted. Set this carefully and confirm the deadline matches what was communicated to participants.</span>
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">06</span>
+            <span>Scroll to the bottom and click <strong>Save</strong>.</span>
+          </li>
+        </ol>
+
+        <div class="field-table-wrap">
+          <table class="field-table" aria-label="Recommended project submission fields">
+            <thead>
+              <tr><th>Field Label</th><th>Field Type</th><th>Required?</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Project Name</td><td>Text</td><td><span class="badge required">Required</span></td></tr>
+              <tr><td>Project Description</td><td>Textarea</td><td><span class="badge required">Required</span></td></tr>
+              <tr><td>GitHub / Repository Link</td><td>URL or Text</td><td><span class="badge required">Required</span></td></tr>
+              <tr><td>Demo Video Link</td><td>URL or Text</td><td><span class="badge optional">Optional</span></td></tr>
+              <tr><td>Project File Upload</td><td>File</td><td><span class="badge optional">Optional</span></td></tr>
+              <tr><td>Tech Stack Used</td><td>Text or Dropdown</td><td><span class="badge optional">Optional</span></td></tr>
+              <tr><td>Team Members (if TEAM event)</td><td>Textarea</td><td><span class="badge optional">Optional</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warning" role="note">
+          <span class="callout-icon">📌</span>
+          <div>
+            The Submission Deadline is enforced automatically — once it passes, the form closes on its own.
+            Do not leave this field blank for hackathon-style events, or submissions will remain open indefinitely.
+          </div>
+        </div>
+
+        <div class="screenshot" role="img" aria-label="Screenshot placeholder">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <rect x="2" y="8" width="36" height="26" rx="3" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="7" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="3" fill="#5B9BD5" opacity="0.4"/>
+            <rect x="13" y="4" width="14" height="5" rx="1.5" stroke="#5B9BD5" stroke-width="1.5"/>
+          </svg>
+          <div class="screenshot-label">Screenshot — Step 3</div>
+          <p class="screenshot-desc">Project Submission Form Fields inline section with example fields configured and the Submission Deadline field visible and filled in.</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- ────────────────────────────────────────
+         STEP 4 — APPROVE A REGISTRATION
+    ──────────────────────────────────────── -->
+    <article class="step-card" id="step-4">
+      <div class="step-rail">
+        <div class="step-num">04</div>
+        <div class="step-rail-line"></div>
+      </div>
+      <div class="step-body">
+        <h2 class="step-title">Approve a Registration</h2>
+        <p class="step-desc">
+          Once participants begin submitting registrations, you review and approve them from the Event
+          Registrations section. Approving a registration grants the student access to the event and
+          triggers an automatic approval notification.
+        </p>
+
+        <div class="breadcrumb" aria-label="Navigation path">
+          Admin Panel <span class="sep">›</span>
+          <span>NKB Events</span> <span class="sep">›</span>
+          <span>Event Registrations</span> <span class="sep">›</span>
+          <span>[Registration Entry]</span>
+        </div>
+
+        <ol class="substeps">
+          <li>
+            <span class="sub-marker">01</span>
+            <span>In the Admin Panel left sidebar, under <strong>NKB Events</strong>, click <strong>Event Registrations</strong>.</span>
+          </li>
+          <li>
+            <span class="sub-marker">02</span>
+            <span>
+              The list shows registrations across all events. On the right side of the page, find the <strong>By Event</strong> filter panel.
+              Click the name of your event to filter the list to only that event's registrations. The page reloads with filtered results.
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">03</span>
+            <span>You will see each registration row with the participant's name or email, the date submitted, and the current <strong>Status</strong> (Pending for new submissions).</span>
+          </li>
+          <li>
+            <span class="sub-marker">04</span>
+            <span>Click on the row of the registration you want to review. The registration detail page opens.</span>
+          </li>
+          <li>
+            <span class="sub-marker">05</span>
+            <span>Read through all the submitted form data — name, email, college, and any other fields you configured. Confirm the registration is valid.</span>
+          </li>
+          <li>
+            <span class="sub-marker">06</span>
+            <span>Find the <strong>Status</strong> field. Click the dropdown and change the value from <code>PENDING</code> to <code>APPROVED</code>.</span>
+          </li>
+          <li>
+            <span class="sub-marker">07</span>
+            <span>Leave the <strong>Rejection Reason</strong> field completely blank.</span>
+          </li>
+          <li>
+            <span class="sub-marker">08</span>
+            <span>Scroll to the bottom and click <strong>Save</strong>.</span>
+          </li>
+          <li>
+            <span class="sub-marker">09</span>
+            <span>The registration status updates to Approved. The student receives an automatic notification confirming their registration is approved and they now have access to the event.</span>
+          </li>
+        </ol>
+
+        <div class="callout success" role="note">
+          <span class="callout-icon">✅</span>
+          <div>
+            After saving, the status badge in the registrations list turns green and shows <strong>Approved</strong>.
+            The student can now join the event from the platform.
+          </div>
+        </div>
+
+        <div class="screenshot" role="img" aria-label="Screenshot placeholder">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <rect x="2" y="8" width="36" height="26" rx="3" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="7" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="3" fill="#5B9BD5" opacity="0.4"/>
+            <rect x="13" y="4" width="14" height="5" rx="1.5" stroke="#5B9BD5" stroke-width="1.5"/>
+          </svg>
+          <div class="screenshot-label">Screenshot — Step 4a</div>
+          <p class="screenshot-desc">Event Registrations list view filtered by event, showing multiple registrations with Pending and Approved status badges.</p>
+        </div>
+
+        <div class="screenshot" role="img" aria-label="Screenshot placeholder">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <rect x="2" y="8" width="36" height="26" rx="3" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="7" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="3" fill="#5B9BD5" opacity="0.4"/>
+            <rect x="13" y="4" width="14" height="5" rx="1.5" stroke="#5B9BD5" stroke-width="1.5"/>
+          </svg>
+          <div class="screenshot-label">Screenshot — Step 4b</div>
+          <p class="screenshot-desc">Individual registration detail page with Status dropdown open and APPROVED selected. Save button visible at the bottom.</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- ────────────────────────────────────────
+         STEP 5 — REJECT A REGISTRATION
+    ──────────────────────────────────────── -->
+    <article class="step-card" id="step-5">
+      <div class="step-rail">
+        <div class="step-num">05</div>
+        <div class="step-rail-line"></div>
+      </div>
+      <div class="step-body">
+        <h2 class="step-title">Reject a Registration</h2>
+        <p class="step-desc">
+          Use the same navigation path as approval. The only difference is the status you set and the
+          Rejection Reason you add. Always fill in the rejection reason — it keeps the record auditable.
+        </p>
+
+        <div class="breadcrumb" aria-label="Navigation path">
+          Admin Panel <span class="sep">›</span>
+          <span>NKB Events</span> <span class="sep">›</span>
+          <span>Event Registrations</span> <span class="sep">›</span>
+          <span>[Registration Entry]</span>
+        </div>
+
+        <ol class="substeps">
+          <li>
+            <span class="sub-marker">01</span>
+            <span>Navigate to <strong>NKB Events → Event Registrations</strong>. Apply the event filter as in Step 4.</span>
+          </li>
+          <li>
+            <span class="sub-marker">02</span>
+            <span>Click on the registration entry you want to reject.</span>
+          </li>
+          <li>
+            <span class="sub-marker">03</span>
+            <span>Review the submitted details carefully before proceeding.</span>
+          </li>
+          <li>
+            <span class="sub-marker">04</span>
+            <span>Find the <strong>Status</strong> field. Click the dropdown and change the value to <code>REJECTED</code>.</span>
+          </li>
+          <li>
+            <span class="sub-marker">05</span>
+            <span>
+              Find the <strong>Rejection Reason</strong> field. Type a brief, clear reason — for example:
+              <div class="code-block" style="margin-top:10px;">Does not meet eligibility criteria for this event.</div>
+              <span class="note">This is shown internally, not to the student. Keep it factual and specific.</span>
+            </span>
+          </li>
+          <li>
+            <span class="sub-marker">06</span>
+            <span>Scroll to the bottom and click <strong>Save</strong>.</span>
+          </li>
+          <li>
+            <span class="sub-marker">07</span>
+            <span>The student receives an automatic rejection notification. The registration record remains in the list with a Rejected status badge for audit purposes.</span>
+          </li>
+        </ol>
+
+        <div class="action-pair">
+          <div class="action-card approve">
+            <div class="action-card-title">When Approving</div>
+            <ul>
+              <li>Status → <strong>APPROVED</strong></li>
+              <li>Rejection Reason → leave blank</li>
+              <li>Student gets access notification</li>
+              <li>List badge turns green</li>
+            </ul>
+          </div>
+          <div class="action-card reject">
+            <div class="action-card-title">When Rejecting</div>
+            <ul>
+              <li>Status → <strong>REJECTED</strong></li>
+              <li>Rejection Reason → fill in always</li>
+              <li>Student gets rejection notification</li>
+              <li>Record stays for audit trail</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout danger" role="note">
+          <span class="callout-icon">⚠️</span>
+          <div>
+            <strong>Think before you save.</strong> The student receives a notification the moment you save — there is no confirmation step. If you accidentally reject a valid registration, you can reopen the record and change the status back to <strong>APPROVED</strong>, but the student will have already received the rejection message. Always double-check the correct registration is open before changing the status.
+          </div>
+        </div>
+
+        <div class="screenshot" role="img" aria-label="Screenshot placeholder">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <rect x="2" y="8" width="36" height="26" rx="3" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="7" stroke="#5B9BD5" stroke-width="1.5"/>
+            <circle cx="20" cy="21" r="3" fill="#5B9BD5" opacity="0.4"/>
+            <rect x="13" y="4" width="14" height="5" rx="1.5" stroke="#5B9BD5" stroke-width="1.5"/>
+          </svg>
+          <div class="screenshot-label">Screenshot — Step 5</div>
+          <p class="screenshot-desc">Registration detail page with Status set to REJECTED and Rejection Reason field filled in. Save button visible at bottom.</p>
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- ═══ STUDENT EXPERIENCE ═══ -->
+  <section class="student-section" id="student-exp">
+    <div class="section-label">Student Experience</div>
+    <p style="font-size:14px; color:var(--muted); margin-bottom:22px;">
+      Here is what the student sees at each stage of the event lifecycle, from the moment the event
+      is published to after it ends.
+    </p>
+
+    <ul class="stage-list" aria-label="Student experience stages">
+      <li class="stage-item">
+        <div class="stage-tag">Before</div>
+        <div class="stage-content">
+          <strong>Event Published (Visibility = PUBLIC)</strong><br>
+          The student can see the event listed on the platform. The event card shows the event name, start date, duration, and short text. If the carousel is enabled, the event also appears in the homepage banner.
+        </div>
+      </li>
+      <li class="stage-item">
+        <div class="stage-tag">Signup</div>
+        <div class="stage-content">
+          <strong>Registration Open</strong><br>
+          During the registration window, a registration button appears on the event page. The student clicks it, fills in the registration form you configured, and submits. Their registration status is set to <strong>Pending</strong> until you act on it.
+        </div>
+      </li>
+      <li class="stage-item">
+        <div class="stage-tag">Approved</div>
+        <div class="stage-content">
+          <strong>After Approval</strong><br>
+          The student receives a notification confirming their registration is approved. They can now see the Join Now button on the event page. If an Event Pass is configured, they also see a View Pass button alongside the event.
+        </div>
+      </li>
+      <li class="stage-item">
+        <div class="stage-tag">Rejected</div>
+        <div class="stage-content">
+          <strong>After Rejection</strong><br>
+          The student receives a rejection notification. The event page reflects the rejected status. The student does not gain access to join the event.
+        </div>
+      </li>
+      <li class="stage-item">
+        <div class="stage-tag">Live</div>
+        <div class="stage-content">
+          <strong>During the Event</strong><br>
+          The event status shows as <strong>Live Now</strong>. Approved participants see the Join Now button and can enter. The event duration counter is visible.
+        </div>
+      </li>
+      <li class="stage-item">
+        <div class="stage-tag">Ended</div>
+        <div class="stage-content">
+          <strong>After the Event Ends</strong><br>
+          The status updates to <strong>Completed</strong>. If the student met the completion threshold and a certificate is configured, they see the message: <em>"You've earned it! Your certificate will be available here soon."</em> The certificate appears on the same screen by end of day. Students can share it directly to LinkedIn and Twitter.
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ═══ TROUBLESHOOTING ═══ -->
+  <section class="troubleshoot-section" id="troubleshoot">
+    <div class="section-label">Troubleshooting &amp; Common Mistakes</div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">The event is saved but students cannot see it on the platform.</div>
+      <div class="trouble-a">Check the <strong>Visibility Status</strong> field on the event. It must be set to <strong>PUBLIC</strong>. If it is PRIVATE, open the event in the Admin Panel, change the status to PUBLIC, and save.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">The registration form is not showing up for students.</div>
+      <div class="trouble-a">Confirm that the <strong>Registration Open Date</strong> has passed and the <strong>Registration Close Date</strong> has not yet passed. The form is only visible within this window. Also verify that at least one form field has been added and saved.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">The certificate is not being generated for students who attended.</div>
+      <div class="trouble-a">Three things to check: (1) <strong>Is Certificate Enabled</strong> is ticked on the event. (2) The <strong>Certificate Template Data</strong> is configured in the Admin Panel with the correct Certificate Name Enum — it must exactly match what was set in the Poster Generation service. (3) The student met the <strong>Minimum Threshold</strong> configured in the Event Certificate Completion Criteria. See the separate Certificate KT Doc for full setup details.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">I approved or rejected the wrong registration by mistake.</div>
+      <div class="trouble-a">Reopen the registration record in the Admin Panel and change the Status to the correct value, then save. The status will update in the system. However, the student has already received the original notification — inform them directly if the first notification was incorrect.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">I cannot find the Event ID after saving.</div>
+      <div class="trouble-a">Open the event in the Admin Panel (NKB Events → Events → click your event). Look at the browser URL — the number between <code>/event/</code> and <code>/change/</code> is your Event ID. For example: <code>/admin/nkb_event/event/<strong>52</strong>/change/</code> → Event ID is <strong>52</strong>.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">The project submission form fields are not saving.</div>
+      <div class="trouble-a">Ensure every field row has a <strong>Field Label</strong> and a <strong>Field Type</strong> selected before saving. Rows with empty labels are silently skipped or may cause a validation error. Also confirm you clicked <strong>Save</strong> after adding the fields — inline sections are not auto-saved.</div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-q">The event is not appearing in the homepage carousel.</div>
+      <div class="trouble-a">Check two things: (1) <strong>Is Carousel Enabled</strong> is ticked. (2) The <strong>Carousel Start Datetime</strong> is set and the date/time has already passed. The carousel only picks up events after the start datetime.</div>
+    </div>
+  </section>
+
+  <!-- ═══ QUICK REFERENCE ═══ -->
+  <section class="qr-section" id="qr">
+    <div class="section-label">Quick Reference Summary</div>
+
+    <div class="qr-table-wrap">
+      <table class="qr-table" aria-label="Quick reference">
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Key Fields / Controls</th>
+            <th>Location in Admin Panel</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Create Event</td>
+            <td>Name, Date/Time, Duration, Visibility, Participation Type, Certificate checkbox, Enroll Plans</td>
+            <td>NKB Events → Events → Add Event</td>
+          </tr>
+          <tr>
+            <td>Get Event ID</td>
+            <td>Read from browser URL after saving (/event/&lt;ID&gt;/change/)</td>
+            <td>Event detail page URL</td>
+          </tr>
+          <tr>
+            <td>Registration Form</td>
+            <td>Field Label, Field Type, Is Required, Options (dropdown), Open Date, Close Date</td>
+            <td>Event detail → Registration Form Fields (inline)</td>
+          </tr>
+          <tr>
+            <td>Project Submission Form</td>
+            <td>Field Label, Field Type, Is Required, Submission Deadline</td>
+            <td>Event detail → Project Submission Form Fields (inline)</td>
+          </tr>
+          <tr>
+            <td>Approve Registration</td>
+            <td>Status → APPROVED → Save (leave Rejection Reason blank)</td>
+            <td>NKB Events → Event Registrations → [entry]</td>
+          </tr>
+          <tr>
+            <td>Reject Registration</td>
+            <td>Status → REJECTED → fill Rejection Reason → Save</td>
+            <td>NKB Events → Event Registrations → [entry]</td>
+          </tr>
+          <tr>
+            <td>Certificate Setup</td>
+            <td>Certificate Resource ID, Template Data JSON, Enrollment Plans</td>
+            <td>Admin Panel → Certificate Template Data (separate section)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout warning" role="note" style="margin-top: 28px;">
+      <span class="callout-icon">📌</span>
+      <div>
+        The Registration Form and Project Submission Form are both configured <em>within</em> the event detail page —
+        not as separate admin objects. Always save the event first (Step 1) before adding forms, and use
+        <strong>Save and continue editing</strong> on the event so you stay on the same page to add the forms immediately after.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="doc-footer">
+    <span class="footer-org">NxtWave &nbsp;·&nbsp; Internal Documentation</span>
+    <span class="footer-date">Last updated: June 2026</span>
+  </footer>
+
+</div>
+</body>
+</html>
