@@ -1265,6 +1265,13 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
   </div>
 </div></div>
 
+<!-- FOOTER RESET -->
+<div style="text-align:center;padding:32px 0 48px;border-top:1px solid rgba(255,255,255,0.07);margin-top:40px;">
+  <button onclick="resetProgress()" style="background:none;border:1px solid rgba(255,255,255,0.12);color:rgba(139,163,190,0.6);font-size:12px;padding:7px 16px;border-radius:6px;cursor:pointer;font-family:inherit;transition:all .2s;" onmouseover="this.style.borderColor='rgba(224,85,85,0.5)';this.style.color='#E05555';" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='rgba(139,163,190,0.6)';">
+    Reset My Progress
+  </button>
+  <p style="font-size:11px;color:rgba(139,163,190,0.35);margin-top:8px;">Clears saved quiz data from this browser only</p>
+</div>
 
 <script>
 // ── CORRECT ANSWERS ──
@@ -1285,6 +1292,13 @@ const APPS_SCRIPT_URL = 'PASTE_YOUR_APPS_SCRIPT_URL_HERE';
 let passed = JSON.parse(localStorage.getItem('kt_passed') || '[]');
 
 // ── INIT ──
+function resetProgress() {
+  if (confirm('Reset all your quiz progress? You will start from Module 01 again.')) {
+    localStorage.removeItem('kt_passed');
+    location.reload();
+  }
+}
+
 function init() {
   passed.forEach(m => unlockTab(m));
   updateProgress();
