@@ -253,16 +253,20 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
     <div class="ov-card"><div class="ov-lbl">Roles</div><div class="ov-val">Admin / Ops</div></div>
   </div>
 
+  <div class="callout info"><span>ℹ</span><span>Creating an event is the first step in the full NKB Events workflow. Everything else — registration forms, certificates, event passes — is tied to the event you create here.</span></div>
+
   <div class="step-card">
     <div class="step-rail">
       <div class="step-num">01</div>
       <div class="step-body">
         <div class="step-title">Navigate to Event Creation <span class="badge">REQUIRED</span></div>
         <ul class="kl">
-          <li>Log in to the <strong>Django Admin Panel</strong></li>
-          <li>Navigate to <strong>NKB Events → Events</strong></li>
-          <li>Click <strong>"Add Event"</strong> in the top right corner</li>
+          <li>Log in to the <strong>Django Admin Panel</strong> with your admin credentials</li>
+          <li>In the left sidebar or main menu, navigate to <strong>NKB Events → Events</strong></li>
+          <li>You will see a list of all existing events with their status</li>
+          <li>Click <strong>"Add Event"</strong> in the top-right corner to open a blank event form</li>
         </ul>
+        <div class="callout info"><span>ℹ</span><span>If you don't see NKB Events in the menu, your admin account may not have the required permissions. Contact the portal administrator to get access.</span></div>
       </div>
     </div>
   </div>
@@ -271,17 +275,15 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
     <div class="step-rail">
       <div class="step-num">02</div>
       <div class="step-body">
-        <div class="step-title">Fill in Event Details</div>
+        <div class="step-title">Fill in Basic Event Details <span class="badge">REQUIRED</span></div>
         <table class="ft">
-          <thead><tr><th>Field</th><th>Description</th><th>Required</th></tr></thead>
+          <thead><tr><th>Field</th><th>What It Does</th><th>Required</th></tr></thead>
           <tbody>
-            <tr><td><span class="fn">Event Name</span></td><td>The display name of the event</td><td><span class="req">Yes</span></td></tr>
-            <tr><td><span class="fn">Description</span></td><td>Full event description shown to students</td><td><span class="req">Yes</span></td></tr>
-            <tr><td><span class="fn">Start / End Date &amp; Time</span></td><td>When the event runs</td><td><span class="req">Yes</span></td></tr>
-            <tr><td><span class="fn">Visibility Status</span></td><td>Set to <code>PUBLIC</code> for students to see it</td><td><span class="req">Yes</span></td></tr>
-            <tr><td><span class="fn">Participation Type</span></td><td><code>INDIVIDUAL</code> or <code>TEAM</code></td><td><span class="req">Yes</span></td></tr>
-            <tr><td><span class="fn">Short Text</span></td><td>Brief text shown on the student-facing event card</td><td>Yes</td></tr>
-            <tr><td><span class="fn">Enroll Plans Str</span></td><td>Eligibility plan — e.g. <code>NIAT</code> for NIAT events</td><td>Yes</td></tr>
+            <tr><td><span class="fn">Event Name</span></td><td>The full display name students see in the app. Keep it clear and descriptive, e.g. <em>"NxtWave AI Workshop — June 2026"</em></td><td><span class="req">Yes</span></td></tr>
+            <tr><td><span class="fn">Short Text</span></td><td>A one-liner shown on the event card in the student portal. Summarize the event's key value in under 80 characters.</td><td><span class="req">Yes</span></td></tr>
+            <tr><td><span class="fn">Description</span></td><td>Full event description visible on the event detail page. Can include agenda, speaker info, prizes, or any relevant context for students.</td><td><span class="req">Yes</span></td></tr>
+            <tr><td><span class="fn">Start Date &amp; Time</span></td><td>When the event officially begins. Students see this prominently on the event card. Use the correct timezone.</td><td><span class="req">Yes</span></td></tr>
+            <tr><td><span class="fn">End Date &amp; Time</span></td><td>When the event ends. Used for attendance threshold calculations in certificate configuration.</td><td><span class="req">Yes</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -292,16 +294,50 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
     <div class="step-rail">
       <div class="step-num">03</div>
       <div class="step-body">
-        <div class="step-title">Save and Copy the Event ID</div>
+        <div class="step-title">Configure Visibility &amp; Eligibility</div>
+        <table class="ft">
+          <thead><tr><th>Field</th><th>What It Does</th><th>Values</th></tr></thead>
+          <tbody>
+            <tr><td><span class="fn">Visibility Status</span></td><td>Controls whether the event appears in the student portal. Keep it <code>DRAFT</code> while setting up, change to <code>PUBLIC</code> when ready to launch.</td><td><code>DRAFT</code> / <code>PUBLIC</code></td></tr>
+            <tr><td><span class="fn">Participation Type</span></td><td>Determines if students join individually or as a team. <code>INDIVIDUAL</code> events register one student per entry. <code>TEAM</code> events group students under a team leader.</td><td><code>INDIVIDUAL</code> / <code>TEAM</code></td></tr>
+            <tr><td><span class="fn">Enroll Plans Str</span></td><td>Restricts who can see and register for the event. Use <code>NIAT</code> to limit to NIAT students, or leave blank / use the appropriate plan code for other cohorts.</td><td><code>NIAT</code> etc.</td></tr>
+            <tr><td><span class="fn">Max Team Size</span></td><td>Only applicable for <code>TEAM</code> events. Sets the upper limit on how many members can be in one team.</td><td>Number</td></tr>
+          </tbody>
+        </table>
+        <div class="callout warn"><span>📌</span><span>Always set Visibility to <code>DRAFT</code> while you're still configuring the event. Change to <code>PUBLIC</code> only after the registration form, submission form, and certificates are all set up.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <div class="step-title">Save and Copy the Event ID <span class="badge">CRITICAL</span></div>
         <ul class="kl">
-          <li>Click <strong>Save</strong> — the event is now created</li>
-          <li>After saving, you will see the event detail page with the <strong>Event ID</strong> in the URL</li>
-          <li>Copy and save this Event ID — it is needed for certificate configuration later</li>
+          <li>Click <strong>Save</strong> at the bottom of the form</li>
+          <li>After saving, the page reloads to the event detail view</li>
+          <li>Look at your browser's address bar — the URL will contain the <strong>Event ID</strong> as a number, e.g. <code>/admin/nkb_events/event/<strong>142</strong>/change/</code></li>
+          <li>Copy this number and paste it somewhere safe (Notepad, Slack message to yourself)</li>
+          <li>You will need this ID later when setting up <strong>Certificate Template Data</strong> in Module 05</li>
         </ul>
-        <div class="callout warn">
-          <span>📌</span>
-          <span>Always copy the Event ID immediately after saving. You will need it in Module 05 (Certificate Configuration).</span>
-        </div>
+        <div class="callout danger"><span>⚠</span><span>If you forget to copy the Event ID, you can always come back to the event list, open the event, and read it from the URL again. But copying it right now saves time later.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">05</div>
+      <div class="step-body">
+        <div class="step-title">Common Mistakes to Avoid</div>
+        <ul class="kl">
+          <li><strong>Wrong Visibility:</strong> Setting to <code>PUBLIC</code> too early means students see an incomplete event. Always use <code>DRAFT</code> while setting up.</li>
+          <li><strong>Wrong Enroll Plans Str:</strong> If this field is mistyped, eligible students won't see the event at all. Double-check the plan code.</li>
+          <li><strong>Start date in the past:</strong> The system may show the event as already ended. Always verify the start/end dates match the actual event schedule.</li>
+          <li><strong>Forgetting the Event ID:</strong> You'll need it for certificate setup. Copy it immediately after saving.</li>
+        </ul>
+        <div class="callout ok"><span>✓</span><span>Once saved with the correct settings, the event is ready for Module 02 (Registration Form) and Module 03 (Submission Form) configuration.</span></div>
       </div>
     </div>
   </div>
@@ -398,15 +434,18 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
     </div>
   </div>
 
+  <div class="callout info"><span>ℹ</span><span>The Registration Form is the information students fill in when they click "Register" for your event. It helps you collect details like college name, year of study, or contact info before the event starts.</span></div>
+
   <div class="step-card">
     <div class="step-rail">
       <div class="step-num">01</div>
       <div class="step-body">
         <div class="step-title">Open the Event for Editing</div>
         <ul class="kl">
-          <li>Go to <strong>NKB Events → Events</strong> and open the event you created</li>
-          <li>Click <strong>Edit</strong> or click the event name to open the edit form</li>
-          <li>Scroll down to find the <strong>Event Registration Form</strong> section</li>
+          <li>Go to <strong>NKB Events → Events</strong> in the Django Admin Panel</li>
+          <li>Find the event you created in Module 01 — use the search bar or scroll to locate it</li>
+          <li>Click the event name or the <strong>Edit</strong> pencil icon to open the edit form</li>
+          <li>Scroll down past the basic event fields to find the <strong>Event Registration Form</strong> section — it appears below the main event fields</li>
         </ul>
       </div>
     </div>
@@ -416,17 +455,44 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
     <div class="step-rail">
       <div class="step-num">02</div>
       <div class="step-body">
-        <div class="step-title">Add the Registration Form <span class="badge">OPTIONAL</span></div>
+        <div class="step-title">Understanding When to Add a Registration Form</div>
         <ul class="kl">
-          <li>Click <strong>"Add another Event Registration Form"</strong></li>
-          <li>Select or create the form students will complete upon registering</li>
-          <li>Typical fields: Name, College, Year of Study, Contact Number</li>
-          <li>Click <strong>Save</strong> after adding the form</li>
+          <li><strong>Add a form</strong> when you need to collect specific student data before the event (e.g. college, branch, year of study, phone number, project idea)</li>
+          <li><strong>Skip the form</strong> for simple awareness events or internal meetups where registration without data collection is sufficient</li>
+          <li>The form data you collect becomes accessible in the Registrations list — useful for filtering and organizing participants</li>
         </ul>
-        <div class="callout info">
-          <span>ℹ</span>
-          <span>If no registration form is added, students can still register for the event but will not be prompted to fill in any details.</span>
-        </div>
+        <div class="callout warn"><span>📌</span><span>If no registration form is added, students can still register for the event but won't be prompted to fill in any details. This is fine for simple events but not for competitions or hackathons where you need participant info.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <div class="step-title">Add the Registration Form <span class="badge">KEY STEP</span></div>
+        <ul class="kl">
+          <li>In the <strong>Event Registration Form</strong> section, click <strong>"Add another Event Registration Form"</strong></li>
+          <li>A dropdown or inline form will appear — select the existing form that matches your event type, or work with the team to create a new form in the form builder</li>
+          <li>The form you attach will be shown to students when they click "Register" on the event</li>
+          <li>Typical form fields used for NIAT events: <strong>Full Name, College Name, Branch, Year of Study, Mobile Number, NW User ID</strong></li>
+        </ul>
+        <div class="callout info"><span>ℹ</span><span>You can only attach forms that already exist in the system. If you need a new custom form built for a specific event, coordinate with the tech team to get it created first.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <div class="step-title">Save and Verify</div>
+        <ul class="kl">
+          <li>After selecting the form, click <strong>Save</strong> at the bottom of the event page</li>
+          <li>To verify: Open the event as a student would (in the student portal or a test account) and confirm the registration form appears when clicking "Register"</li>
+          <li>Check that all the expected fields are present in the form</li>
+        </ul>
+        <div class="callout ok"><span>✓</span><span>Once the registration form is attached and saved, students who register will see these fields. Their responses are stored and visible in the Registrations section — covered in Module 04.</span></div>
       </div>
     </div>
   </div>
@@ -523,15 +589,18 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
     </div>
   </div>
 
+  <div class="callout info"><span>ℹ</span><span>The Submission Form is different from the Registration Form. Registration Form = data collected when a student signs up. Submission Form = what students upload or fill in to submit their actual project or deliverable for evaluation.</span></div>
+
   <div class="step-card">
     <div class="step-rail">
       <div class="step-num">01</div>
       <div class="step-body">
-        <div class="step-title">Locate the Submission Form Section</div>
+        <div class="step-title">Know When to Use a Submission Form</div>
         <ul class="kl">
-          <li>Open the event in edit mode from <strong>NKB Events → Events</strong></li>
-          <li>Scroll to the <strong>Event Project Submission Form</strong> section</li>
-          <li>This is separate from the Registration Form section</li>
+          <li>Use this for <strong>hackathons, competitions, or project-based events</strong> where students need to submit a deliverable</li>
+          <li>Typical submission fields: GitHub repo link, deployed project URL, video demo link, project description, team member details</li>
+          <li><strong>Do NOT add</strong> a submission form for simple attendance-based events like webinars or workshops — it is unnecessary</li>
+          <li>The submission form appears to students within the event, typically as a "Submit Project" button visible after they register</li>
         </ul>
       </div>
     </div>
@@ -541,17 +610,44 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
     <div class="step-rail">
       <div class="step-num">02</div>
       <div class="step-body">
-        <div class="step-title">Add the Submission Form <span class="badge">OPTIONAL</span></div>
+        <div class="step-title">Locate the Submission Form Section</div>
         <ul class="kl">
-          <li>Click <strong>"Add another Event Project Submission Form"</strong></li>
-          <li>Select the form students will use to submit their project</li>
-          <li>Configure any submission deadline or window if needed</li>
-          <li>Click <strong>Save</strong> after adding the form</li>
+          <li>Open the event in edit mode from <strong>NKB Events → Events</strong></li>
+          <li>Scroll down below the Registration Form section — you will find the <strong>Event Project Submission Form</strong> section separately</li>
+          <li>Both forms live on the same event edit page but are distinct sections</li>
         </ul>
-        <div class="callout info">
-          <span>ℹ</span>
-          <span>This step is optional — only add it if the event specifically requires project submission from students.</span>
-        </div>
+        <div class="callout warn"><span>📌</span><span>The Registration Form and Submission Form serve completely different purposes. A student fills the Registration Form when they sign up. They fill the Submission Form when they submit their completed project — usually at the end of the event.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <div class="step-title">Add the Submission Form <span class="badge">KEY STEP</span></div>
+        <ul class="kl">
+          <li>Click <strong>"Add another Event Project Submission Form"</strong> within the section</li>
+          <li>Select the appropriate submission form from the dropdown — this form must already be created in the form builder</li>
+          <li>The form you attach will be the one students use to submit their project deliverable</li>
+          <li>Coordinate with the tech team if you need a new submission form created specifically for this event</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <div class="step-title">Configure Deadline and Save</div>
+        <ul class="kl">
+          <li>If the submission form section allows configuring a <strong>submission deadline</strong>, set the exact date and time after which submissions will be closed</li>
+          <li>Submissions after the deadline will not be accepted, so make sure the deadline is correct before going live</li>
+          <li>Click <strong>Save</strong> at the bottom of the event page to apply all changes</li>
+          <li>Verify by switching to the student view — you should see the "Submit Project" button appear on the event page after registering</li>
+        </ul>
+        <div class="callout ok"><span>✓</span><span>Once saved, registered students will be able to see and fill the submission form from their event page. All submissions are stored and accessible to admins for evaluation.</span></div>
       </div>
     </div>
   </div>
@@ -648,15 +744,18 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
     </div>
   </div>
 
+  <div class="callout info"><span>ℹ</span><span>When students register for an event, their registrations appear in the Admin Panel with a <strong>Pending</strong> status by default. You review each registration and either Approve or Reject it. Approval gives the student access to the event; rejection blocks access.</span></div>
+
   <div class="step-card">
     <div class="step-rail">
       <div class="step-num">01</div>
       <div class="step-body">
-        <div class="step-title">Access Registrations List</div>
+        <div class="step-title">Access the Registrations List</div>
         <ul class="kl">
-          <li>Go to <strong>NKB Events → Events</strong> and select the event</li>
-          <li>Open the <strong>Registrations</strong> section for that event</li>
-          <li>You will see all students who have registered with their current status</li>
+          <li>Go to <strong>NKB Events → Events</strong> and find your event</li>
+          <li>Open the event, then scroll to the <strong>Registrations</strong> section — or look for a <strong>View Registrations</strong> link</li>
+          <li>Alternatively, go to <strong>NKB Events → Registrations</strong> and filter by your event name</li>
+          <li>You will see a list of all registrations with columns: Student Name, NW ID, Registration Date, Status, and Form Responses</li>
         </ul>
       </div>
     </div>
@@ -666,17 +765,14 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
     <div class="step-rail">
       <div class="step-num">02</div>
       <div class="step-body">
-        <div class="step-title">Approve a Registration <span class="badge">APPROVE</span></div>
+        <div class="step-title">Review a Registration Entry</div>
         <ul class="kl">
-          <li>Click on a registration entry to open it</li>
-          <li>Review the student's form responses</li>
-          <li>Change the <strong>Status</strong> field to <strong>Approved</strong></li>
-          <li>Click <strong>Save</strong></li>
+          <li>Click on a student's registration entry to open its detail view</li>
+          <li>Review the information the student filled in the registration form — check for completeness and eligibility</li>
+          <li>Verify details like: Are they a valid NIAT student? Did they fill all required fields? Is their contact information correct?</li>
+          <li>The current <strong>Status</strong> will show as <code>PENDING</code> until you take action</li>
         </ul>
-        <div class="callout ok">
-          <span>✓</span>
-          <span>Once approved, the student can see the event as active and will receive any configured event pass.</span>
-        </div>
+        <div class="callout warn"><span>📌</span><span>Some events may have specific eligibility criteria — e.g. only 2nd year students, or only students from a specific batch. Verify against the event rules before approving.</span></div>
       </div>
     </div>
   </div>
@@ -685,17 +781,63 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
     <div class="step-rail">
       <div class="step-num">03</div>
       <div class="step-body">
+        <div class="step-title">Approve a Registration <span class="badge">APPROVE</span></div>
+        <ul class="kl">
+          <li>In the registration detail view, locate the <strong>Status</strong> dropdown field</li>
+          <li>Change it from <code>PENDING</code> to <strong><code>APPROVED</code></strong></li>
+          <li>Click <strong>Save</strong> at the bottom of the page</li>
+          <li>The student's event access is now activated — they can see the event as live in their portal</li>
+          <li>If Event Pass is configured (Module 06), the student will also receive their personalized pass automatically upon approval</li>
+        </ul>
+        <div class="callout ok"><span>✓</span><span>Approved students can log in and see the event as active. If an Event Pass was configured, they'll receive it immediately. This is the most common action you'll take.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <div class="step-title">Bulk Approve Multiple Registrations</div>
+        <ul class="kl">
+          <li>On the Registrations list view, check the checkboxes next to multiple registrations</li>
+          <li>Use the <strong>Action</strong> dropdown at the top to select <strong>"Approve selected registrations"</strong></li>
+          <li>Click <strong>Go</strong> — all selected registrations are approved in one operation</li>
+          <li>This is useful when a large batch of students register at once and all are eligible</li>
+        </ul>
+        <div class="callout info"><span>ℹ</span><span>Bulk approve saves significant time when handling 50+ registrations. Always do a spot-check of a few entries before bulk approving to ensure eligibility.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">05</div>
+      <div class="step-body">
         <div class="step-title">Reject a Registration <span class="badge">REJECT</span></div>
         <ul class="kl">
-          <li>Click on the registration entry you wish to reject</li>
-          <li>Change the <strong>Status</strong> field to <strong>Rejected</strong></li>
-          <li>Optionally add a reason in the <strong>Notes</strong> field</li>
+          <li>Open the registration entry and change the <strong>Status</strong> from <code>PENDING</code> to <strong><code>REJECTED</code></strong></li>
+          <li>Fill in the <strong>Notes</strong> field with the reason for rejection — this is visible to admins and helps future reference (e.g. "Not an NIAT student", "Incomplete form", "Duplicate registration")</li>
           <li>Click <strong>Save</strong></li>
+          <li>The student will no longer have active access to the event</li>
         </ul>
-        <div class="callout danger">
-          <span>✕</span>
-          <span>Rejection can be reversed — set the status back to Approved at any time to reinstate the student.</span>
-        </div>
+        <div class="callout danger"><span>✕</span><span>Rejection is <strong>not permanent</strong>. You can reverse it at any time by opening the same registration and setting the status back to <code>APPROVED</code>. Always add a note explaining the reason — it helps when someone follows up.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">06</div>
+      <div class="step-body">
+        <div class="step-title">Re-Approve a Rejected Student</div>
+        <ul class="kl">
+          <li>If you need to reinstate a student whose registration was rejected, open their registration entry</li>
+          <li>Change the Status from <code>REJECTED</code> back to <code>APPROVED</code></li>
+          <li>Click Save — the student regains full event access immediately</li>
+          <li>Update or clear the Notes field to reflect the reinstatement</li>
+        </ul>
+        <div class="callout ok"><span>✓</span><span>No new registration needed. Simply editing the status to Approved is sufficient to restore access. The student's original form data is preserved.</span></div>
       </div>
     </div>
   </div>
@@ -799,49 +941,75 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
     <div class="ov-card"><div class="ov-lbl">Delivery</div><div class="ov-val">By End of Day</div></div>
   </div>
 
-  <div class="callout warn"><span>📌</span><div><strong>Prerequisite:</strong> The certificate template must be configured in the <strong>Poster Generation service</strong> first. A <strong>Certificate Name Enum</strong> will then be available — keep it handy.</div></div>
+  <div class="callout warn"><span>📌</span><div><strong>Prerequisite:</strong> The certificate template must be configured in the <strong>Poster Generation service</strong> first. A <strong>Certificate Name Enum</strong> will then be available — keep it handy before starting this module.</div></div>
+
+  <div class="callout info"><span>ℹ</span><span>Certificate generation is a 2-part process: (1) Enable it on the <strong>event itself</strong> and set the attendance threshold, then (2) Create a <strong>Certificate Template Data</strong> entry that links the event to the correct certificate design. Both parts must be correct for certificates to generate automatically.</span></div>
 
   <div class="step-card">
     <div class="step-rail"><div class="step-num">01</div>
     <div class="step-body">
-      <div class="step-title">Enable Certificate on the Event <span class="badge">EVENT SETUP</span></div>
+      <div class="step-title">Enable Certificate on the Event <span class="badge">MASTER SWITCH</span></div>
       <ul class="kl">
-        <li>While editing the event, locate the <strong>Is Certificate Enabled</strong> checkbox</li>
-        <li>Enable it to activate certificate generation — this is the master switch</li>
-        <li>If not enabled, no certificate will be generated regardless of other settings</li>
+        <li>Open your event in edit mode: <strong>NKB Events → Events → [your event]</strong></li>
+        <li>Scroll down to find the <strong>Is Certificate Enabled</strong> checkbox</li>
+        <li>Check this box to activate certificate generation — this is the global on/off switch</li>
+        <li>If this is not checked, no certificate will be generated for anyone, regardless of any other settings</li>
+        <li>Click <strong>Save</strong> after enabling it</li>
       </ul>
+      <div class="callout warn"><span>📌</span><span>Enable this checkbox <strong>before</strong> the event starts. Enabling it after students have completed the event will not retroactively issue certificates to those who already attended.</span></div>
     </div></div>
   </div>
 
   <div class="step-card">
     <div class="step-rail"><div class="step-num">02</div>
     <div class="step-body">
-      <div class="step-title">Set Completion Criteria <span class="badge">EVENT SETUP</span></div>
+      <div class="step-title">Set Resource ID and Minimum Threshold <span class="badge">CRITERIA</span></div>
       <table class="ft">
-        <thead><tr><th>Field</th><th>Description</th></tr></thead>
+        <thead><tr><th>Field</th><th>What It Does</th><th>Guidance</th></tr></thead>
         <tbody>
-          <tr><td><span class="fn">Resource ID</span></td><td>Content unit ID tied to the event. Leave blank for virtual meetups.</td></tr>
-          <tr><td><span class="fn">Minimum Threshold (%)</span></td><td>% of event completion required. E.g. 50% on a 2-hr event = attend 1 hr. Defaults to 1% if empty.</td></tr>
+          <tr><td><span class="fn">Resource ID</span></td><td>Links the event to an LMS content unit — the system uses this to track how much of the content a student completed.</td><td>Leave blank for standalone virtual meetups that have no LMS resource.</td></tr>
+          <tr><td><span class="fn">Minimum Threshold (%)</span></td><td>The percentage of event content a student must complete to earn their certificate. Example: 50% on a 2-hour event = 1 hour attended minimum.</td><td>If left blank, defaults to <strong>1%</strong> — meaning nearly everyone who opens the event gets a certificate. Set a meaningful value (e.g. 50–80%) for workshops.</td></tr>
         </tbody>
       </table>
-      <div class="callout warn"><span>📌</span><span>Students who don't meet the threshold will not receive a certificate.</span></div>
+      <div class="callout danger"><span>⚠</span><span>Students who don't meet the Minimum Threshold will NOT receive a certificate. Set this carefully — too high excludes deserving students; too low makes it meaningless.</span></div>
     </div></div>
   </div>
 
   <div class="step-card">
     <div class="step-rail"><div class="step-num">03</div>
     <div class="step-body">
-      <div class="step-title">Configure Certificate Template Data <span class="badge">ADMIN PANEL</span></div>
+      <div class="step-title">Create a Certificate Template Data Entry <span class="badge">SECOND PART</span></div>
       <ul class="kl">
-        <li>Copy the <strong>Event ID</strong> from the event you created</li>
-        <li>Go to <strong>Certificate Template Data</strong> in the Admin Panel</li>
-        <li>Fill in: <strong>Certificate Resource ID</strong> (paste Event ID), <strong>Template Data</strong> (JSON below), <strong>Enrollment Plans</strong> (<code>NIAT</code>)</li>
+        <li>In the Django Admin Panel, navigate to <strong>Certificate Template Data</strong> (under NKB Events or Certificates section)</li>
+        <li>Click <strong>Add Certificate Template Data</strong> to create a new entry</li>
+        <li>Fill in the following three fields:</li>
       </ul>
+      <table class="ft">
+        <thead><tr><th>Field</th><th>What to Enter</th></tr></thead>
+        <tbody>
+          <tr><td><span class="fn">Certificate Resource ID</span></td><td>Paste the <strong>Event ID</strong> you saved in Module 01 (from the event URL). This links the certificate config to your specific event.</td></tr>
+          <tr><td><span class="fn">Template Data</span></td><td>A JSON object identifying the certificate design. Use the template below exactly.</td></tr>
+          <tr><td><span class="fn">Enrollment Plans</span></td><td>Enter <code>NIAT</code> for NIAT events. This limits certificate generation to only students enrolled in this plan.</td></tr>
+        </tbody>
+      </table>
       <pre>{
   "certificate_template_type": "DEFAULT",
   "certificate_name_enum": "NIAT_MURFAI_CERTIFICATE"
 }</pre>
-      <div class="callout danger"><span>📌</span><span>The Certificate Name Enum must exactly match what was configured in Poster Generation. Any mismatch = no certificate generated.</span></div>
+      <div class="callout danger"><span>⚠</span><span>The <code>certificate_name_enum</code> value must exactly match the enum set up in Poster Generation — character for character, including underscores and uppercase. Any mismatch means zero certificates are generated. Always copy-paste this value, never type it manually.</span></div>
+    </div></div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail"><div class="step-num">04</div>
+    <div class="step-body">
+      <div class="step-title">Certificate Delivery and Troubleshooting</div>
+      <ul class="kl">
+        <li>Certificates are <strong>not instant</strong> — they are generated in a batch process that runs after the event ends</li>
+        <li>Eligible students receive their certificate <strong>by end of day</strong> on the event date</li>
+        <li>Students can view and download it from the <strong>Achievements / Certificates section</strong> in their NxtWave app</li>
+      </ul>
+      <div class="callout info"><span>ℹ</span><div><strong>If students say they didn't receive a certificate, check in order:</strong><br>1. Is <em>Is Certificate Enabled</em> checked on the event?<br>2. Did the student meet the Minimum Threshold?<br>3. Is the <code>certificate_name_enum</code> in Template Data correct and matching Poster Generation?<br>4. Is the Certificate Resource ID set to the correct Event ID?</div></div>
     </div></div>
   </div>
 
@@ -944,16 +1112,19 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
     <div class="ov-card"><div class="ov-lbl">Section</div><div class="ov-val">Event Pass Config</div></div>
   </div>
 
-  <div class="callout warn"><span>📌</span><div><strong>Prerequisite:</strong> The pass template must be configured in the <strong>Poster Generation service</strong> first. A <strong>Poster Name Enum</strong> will then be available.</div></div>
+  <div class="callout warn"><span>📌</span><div><strong>Prerequisite:</strong> The pass template must be configured in the <strong>Poster Generation service</strong> first. A <strong>Poster Name Enum</strong> will then be available — get this value before proceeding.</div></div>
+
+  <div class="callout info"><span>ℹ</span><span>An Event Pass is a personalized digital card (like a conference badge) that each registered student receives automatically when their registration is approved. It typically shows their name, photo, and event details overlaid on a branded poster design created by the design team.</span></div>
 
   <div class="step-card">
     <div class="step-rail"><div class="step-num">01</div>
     <div class="step-body">
-      <div class="step-title">Enter the Poster Name Enum <span class="badge">EVENT PASS CONFIG</span></div>
+      <div class="step-title">Open the Event Pass Config Section</div>
       <ul class="kl">
-        <li>Locate the <strong>Event Pass Config</strong> section in the event edit page</li>
-        <li>In <strong>Poster Name Enum</strong>, enter the exact enum value from the Poster Generation service</li>
-        <li>Any typo or mismatch will cause the pass to not generate</li>
+        <li>Open your event in edit mode: <strong>NKB Events → Events → [your event]</strong></li>
+        <li>Scroll down to find the <strong>Event Pass Config</strong> section — it appears below the certificate settings</li>
+        <li>This section is where all pass-related configuration lives</li>
+        <li>If you don't see the Event Pass Config section, check that the event is saved and your account has permission to configure passes</li>
       </ul>
     </div></div>
   </div>
@@ -961,30 +1132,63 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
   <div class="step-card">
     <div class="step-rail"><div class="step-num">02</div>
     <div class="step-body">
-      <div class="step-title">Select Overlay Options <span class="badge">MUST MATCH TEMPLATE</span></div>
-      <table class="ft">
-        <thead><tr><th>Option</th><th>What It Overlays</th></tr></thead>
-        <tbody>
-          <tr><td><span class="fn">Overlay Name</span></td><td>Student's name</td></tr>
-          <tr><td><span class="fn">Overlay Profile Pic</span></td><td>Student's profile picture</td></tr>
-          <tr><td><span class="fn">Overlay Event Start Date</span></td><td>Event start date</td></tr>
-          <tr><td><span class="fn">Overlay Event End Date</span></td><td>Event end date</td></tr>
-          <tr><td><span class="fn">Overlay Issued Date</span></td><td>Date the pass was issued</td></tr>
-        </tbody>
-      </table>
-      <div class="callout warn"><span>📌</span><span>These must exactly match what was configured in the pass template. Mismatch = pass won't render correctly.</span></div>
+      <div class="step-title">Enter the Poster Name Enum <span class="badge">CRITICAL</span></div>
+      <ul class="kl">
+        <li>In the <strong>Event Pass Config</strong> section, find the <strong>Poster Name Enum</strong> field</li>
+        <li>Enter the exact enum value that was set up in the Poster Generation service for this event's pass template</li>
+        <li>This value is usually in ALL_CAPS_WITH_UNDERSCORES format, e.g. <code>NIAT_JUNE_EVENT_PASS</code></li>
+        <li>Get this value from the design/tech team who created the template — do not guess it</li>
+        <li>Any typo, extra space, or case mismatch will cause the pass to silently fail — students will not receive anything</li>
+      </ul>
+      <div class="callout danger"><span>⚠</span><span>Always copy-paste the Poster Name Enum from the source. Never type it manually. Even one wrong character prevents the pass from generating for all students.</span></div>
     </div></div>
   </div>
 
   <div class="step-card">
     <div class="step-rail"><div class="step-num">03</div>
     <div class="step-body">
-      <div class="step-title">Set Fallback Avatar URL <span class="badge">CONDITIONAL</span></div>
+      <div class="step-title">Select the Overlay Options <span class="badge">MUST MATCH TEMPLATE</span></div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Overlay options tell the system which dynamic data to print on top of the poster background. Only enable the overlays that the pass template was designed to support — check with the person who created the template.</p>
+      <table class="ft">
+        <thead><tr><th>Option</th><th>What It Overlays on the Pass</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><span class="fn">Overlay Name</span></td><td>The student's full name, personalized on each pass</td><td>Enable for almost all event passes — makes the pass personal</td></tr>
+          <tr><td><span class="fn">Overlay Profile Pic</span></td><td>The student's profile photo from their NxtWave account</td><td>Enable if the template has a photo slot. Requires Fallback Avatar URL (see Step 4)</td></tr>
+          <tr><td><span class="fn">Overlay Event Start Date</span></td><td>The event's start date printed on the pass</td><td>Enable if the template includes an event date display area</td></tr>
+          <tr><td><span class="fn">Overlay Event End Date</span></td><td>The event's end date printed on the pass</td><td>Enable for multi-day events where the template shows date range</td></tr>
+          <tr><td><span class="fn">Overlay Issued Date</span></td><td>The date the pass was generated and issued</td><td>Less common — only if the template has an "Issued on" field</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn"><span>📌</span><span>Only select overlays that the poster template was designed for. If you enable "Overlay Profile Pic" but the template has no photo slot, the pass layout will break or text will be printed in the wrong place.</span></div>
+    </div></div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail"><div class="step-num">04</div>
+    <div class="step-body">
+      <div class="step-title">Set the Fallback Avatar URL <span class="badge">CONDITIONAL</span></div>
       <ul class="kl">
-        <li>Only relevant when <strong>Overlay Profile Pic</strong> is selected</li>
-        <li>If a student has no profile photo, this image URL is used instead</li>
-        <li>Provide a valid default avatar image URL</li>
+        <li>This field is only relevant when <strong>Overlay Profile Pic</strong> is enabled</li>
+        <li>Some students may not have uploaded a profile photo to their NxtWave account</li>
+        <li>In that case, the system uses the Fallback Avatar URL as a placeholder image on their pass</li>
+        <li>Provide a direct link to a generic avatar or brand logo image (must be a publicly accessible URL ending in .png or .jpg)</li>
+        <li>If this field is left blank and a student has no profile pic, their pass may render with a broken image or empty space</li>
       </ul>
+      <div class="callout info"><span>ℹ</span><span>Use a neutral placeholder image like a silhouette avatar or the NxtWave logo as the fallback. Avoid using a specific person's photo as the default.</span></div>
+    </div></div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail"><div class="step-num">05</div>
+    <div class="step-body">
+      <div class="step-title">Save and Verify the Pass Setup</div>
+      <ul class="kl">
+        <li>After filling in Poster Name Enum, selecting overlays, and setting the fallback URL, click <strong>Save</strong></li>
+        <li>To test: approve a test registration (your own or a colleague's) and check if the event pass appears in the student's event view</li>
+        <li>The pass should show the student's name (and photo if enabled) on the branded template background</li>
+        <li>If the pass does not appear within a few minutes of approval, verify the Poster Name Enum matches exactly what's in Poster Generation</li>
+      </ul>
+      <div class="callout ok"><span>✓</span><span>Once configured correctly, passes are fully automatic. Every new approved registration instantly receives a personalized pass — no manual action needed per student. The pass remains accessible in the student's event page.</span></div>
     </div></div>
   </div>
 
