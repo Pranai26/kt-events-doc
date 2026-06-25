@@ -21,6 +21,7 @@
   --success:      #3DAA78;
   --success-dim:  rgba(61,170,120,0.12);
   --border:       rgba(255,255,255,0.07);
+  --locked:       rgba(255,255,255,0.03);
   --font-body:    'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-mono:    'Cascadia Code','Consolas','Courier New',monospace;
 }
@@ -28,159 +29,167 @@
 html { scroll-behavior: smooth; }
 body { background: var(--ground); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.7; }
 
-.top-bar { height: 3px; background: linear-gradient(90deg,var(--accent) 0%,#C87800 55%,var(--accent-2) 100%); }
+.top-bar { height: 3px; background: linear-gradient(90deg, var(--accent) 0%, #C87800 50%, var(--accent-2) 100%); }
 .wrap { max-width: 900px; margin: 0 auto; padding: 0 28px; }
 
 /* HERO */
-.hero { padding: 48px 0 36px; border-bottom: 1px solid var(--border); }
-.hero-eye { font-family: var(--font-mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.hero-eye::before { content:''; width:7px; height:7px; background:var(--accent); border-radius:50%; flex-shrink:0; }
-.hero-title { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+.hero { padding: 44px 0 32px; border-bottom: 1px solid var(--border); }
+.hero-eye { font-family: var(--font-mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.hero-eye::before { content:''; width:7px; height:7px; background:var(--accent); border-radius:50%; }
+.hero-title { font-size: 30px; font-weight: 700; line-height: 1.2; margin-bottom: 10px; }
 .hero-title span { color: var(--accent); }
-.hero-sub { color: var(--muted); font-size: 14px; max-width: 540px; }
-.hero-meta { display: flex; gap: 24px; margin-top: 22px; flex-wrap: wrap; }
-.hero-badge { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 13px; }
-.hero-badge .dot { width: 8px; height: 8px; border-radius: 50%; }
-.dot-amber { background: var(--accent); }
-.dot-blue  { background: var(--accent-2); }
-.dot-green { background: var(--success); }
+.hero-sub { color: var(--muted); font-size: 14px; max-width: 560px; }
+
+/* PROGRESS BAR */
+.progress-wrap { padding: 16px 0 0; }
+.progress-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
+.progress-track { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.progress-fill  { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 3px; transition: width .6s ease; }
 
 /* TAB NAV */
 .tab-nav { position: sticky; top: 0; z-index: 50; background: var(--surface); border-bottom: 1px solid var(--border); }
-.tab-nav .wrap { display: flex; gap: 0; overflow-x: auto; }
-.tab-btn { flex-shrink: 0; padding: 14px 22px; background: none; border: none; color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; white-space: nowrap; font-family: var(--font-body); }
-.tab-btn:hover { color: var(--text); }
-.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-.tab-num { font-family: var(--font-mono); font-size: 10px; color: var(--muted); display: block; margin-bottom: 2px; }
-.tab-btn.active .tab-num { color: var(--accent); }
+.tab-nav .wrap { display: flex; overflow-x: auto; scrollbar-width: none; }
+.tab-nav .wrap::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0; padding: 12px 18px; background: none; border: none;
+  color: var(--muted); font-size: 12px; font-weight: 500; cursor: pointer;
+  border-bottom: 2px solid transparent; transition: color .2s, border-color .2s;
+  white-space: nowrap; font-family: var(--font-body); text-align: left;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.tab-btn:hover:not(.locked) { color: var(--text); }
+.tab-btn.active  { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-btn.done    { color: var(--success); }
+.tab-btn.locked  { color: rgba(139,163,190,0.4); cursor: not-allowed; }
+.tab-num { font-family: var(--font-mono); font-size: 10px; display: flex; align-items: center; gap: 5px; }
+.lock-icon { font-size: 10px; }
+.tab-btn.done .tab-num::after { content: ' ✓'; color: var(--success); }
 
-/* MODULE PANELS */
+/* MODULE */
 .module { display: none; padding-bottom: 80px; }
 .module.active { display: block; }
 
-/* SECTION HEADINGS */
-.sec-head { padding: 40px 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
-.sec-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-2); margin-bottom: 8px; }
-.sec-title { font-size: 26px; font-weight: 700; }
-.sec-sub { color: var(--muted); font-size: 14px; margin-top: 8px; }
+/* LOCKED OVERLAY */
+.module-locked-msg {
+  margin: 60px auto; max-width: 420px; text-align: center;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 40px 32px;
+}
+.lock-big { font-size: 48px; margin-bottom: 16px; }
+.lock-msg-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.lock-msg-sub { font-size: 14px; color: var(--muted); }
 
-/* VIDEO SECTION */
-.video-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 36px; }
-.video-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-.video-header .icon { font-size: 16px; }
-.video-header strong { font-size: 14px; }
-.video-header span { margin-left: auto; font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+/* SECTION HEAD */
+.sec-head { padding: 36px 0 22px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+.sec-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-2); margin-bottom: 6px; }
+.sec-title { font-size: 24px; font-weight: 700; }
+.sec-sub { color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+/* VIDEO */
+.video-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 30px; }
+.video-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.video-header strong { flex: 1; }
+.video-header span { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
 .video-frame { position: relative; padding-top: 56.25%; background: #08111A; }
 .video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
-.video-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--muted); }
-.video-placeholder .play-icon { width: 56px; height: 56px; background: var(--accent-dim); border: 1px solid rgba(240,165,0,.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-.video-placeholder p { font-size: 13px; }
+.video-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--muted); }
+.video-placeholder .play { width: 52px; height: 52px; background: var(--accent-dim); border: 1px solid rgba(240,165,0,.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
 
 /* CALLOUT */
-.callout { border-radius: 8px; padding: 14px 18px; margin: 18px 0; font-size: 14px; display: flex; gap: 10px; }
-.callout.warn  { background: var(--accent-dim);   border-left: 3px solid var(--accent); }
-.callout.info  { background: var(--accent-2-dim); border-left: 3px solid var(--accent-2); }
-.callout.danger{ background: var(--danger-dim);   border-left: 3px solid var(--danger); }
-.callout.ok    { background: var(--success-dim);  border-left: 3px solid var(--success); }
-.callout-icon  { flex-shrink: 0; font-size: 15px; margin-top: 1px; }
+.callout { border-radius: 8px; padding: 13px 17px; margin: 16px 0; font-size: 14px; display: flex; gap: 10px; }
+.callout.warn   { background: var(--accent-dim);   border-left: 3px solid var(--accent); }
+.callout.info   { background: var(--accent-2-dim); border-left: 3px solid var(--accent-2); }
+.callout.danger { background: var(--danger-dim);   border-left: 3px solid var(--danger); }
+.callout.ok     { background: var(--success-dim);  border-left: 3px solid var(--success); }
 
 /* STEP CARD */
-.step-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; overflow: hidden; }
+.step-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
 .step-rail  { display: flex; }
-.step-number { width: 52px; flex-shrink: 0; background: var(--surface-2); display: flex; align-items: flex-start; justify-content: center; padding-top: 22px; }
-.step-num-txt { font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: var(--accent); opacity: .35; }
-.step-body  { flex: 1; padding: 20px 22px; }
-.step-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-.step-badge { font-family: var(--font-mono); font-size: 10px; background: var(--accent-dim); color: var(--accent); border-radius: 4px; padding: 2px 7px; }
-
-/* FIELD TABLE */
-.field-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
-.field-table th { text-align: left; padding: 8px 12px; background: var(--surface-3); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
-.field-table td { padding: 9px 12px; border-top: 1px solid var(--border); vertical-align: top; }
-.field-table tr:hover td { background: rgba(255,255,255,.02); }
-.field-name { font-family: var(--font-mono); font-size: 12px; color: var(--accent-2); }
-.req { color: var(--danger); }
-code { font-family: var(--font-mono); font-size: 12px; background: var(--surface-3); padding: 2px 6px; border-radius: 4px; color: var(--accent-2); }
-pre { background: var(--surface-3); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: var(--font-mono); font-size: 12px; color: var(--accent-2); overflow-x: auto; margin: 10px 0; }
-
-/* OVERVIEW GRID */
-.overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 32px; }
-.ov-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-.ov-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
-.ov-value { font-size: 14px; font-weight: 600; }
+.step-num   { width: 50px; flex-shrink: 0; background: var(--surface-2); display: flex; align-items: flex-start; justify-content: center; padding-top: 20px; font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: var(--accent); opacity: .35; }
+.step-body  { flex: 1; padding: 18px 20px; }
+.step-title { font-size: 15px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.badge { font-family: var(--font-mono); font-size: 10px; background: var(--accent-dim); color: var(--accent); border-radius: 4px; padding: 2px 7px; }
 
 /* LIST */
-ul.kt-list { padding-left: 0; list-style: none; margin: 8px 0 12px; }
-ul.kt-list li { padding: 5px 0 5px 20px; position: relative; font-size: 14px; color: var(--muted); }
-ul.kt-list li::before { content:'›'; position: absolute; left: 4px; color: var(--accent); font-weight: 700; }
-ul.kt-list li strong { color: var(--text); }
+ul.kl { list-style: none; padding: 0; margin: 8px 0 12px; }
+ul.kl li { padding: 4px 0 4px 18px; position: relative; font-size: 14px; color: var(--muted); }
+ul.kl li::before { content:'›'; position: absolute; left: 3px; color: var(--accent); font-weight: 700; }
+ul.kl li strong { color: var(--text); }
 
-/* DIVIDER */
-.divider { height: 1px; background: var(--border); margin: 32px 0; }
+/* TABLE */
+.ft { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+.ft th { text-align: left; padding: 8px 12px; background: var(--surface-3); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; }
+.ft td { padding: 9px 12px; border-top: 1px solid var(--border); vertical-align: top; }
+.fn { font-family: var(--font-mono); font-size: 12px; color: var(--accent-2); }
+.req { color: var(--danger); }
+code { font-family: var(--font-mono); font-size: 12px; background: var(--surface-3); padding: 2px 6px; border-radius: 4px; color: var(--accent-2); }
+pre  { background: var(--surface-3); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: var(--font-mono); font-size: 12px; color: var(--accent-2); overflow-x: auto; margin: 10px 0; }
+.divider { height: 1px; background: var(--border); margin: 28px 0; }
 
 /* QUIZ */
-.quiz-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-top: 40px; }
-.quiz-header { background: linear-gradient(135deg, #152334 0%, #1a2d42 100%); padding: 22px 26px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
-.quiz-icon { width: 40px; height: 40px; background: var(--accent-dim); border: 1px solid rgba(240,165,0,.3); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-.quiz-header-text h3 { font-size: 16px; font-weight: 700; }
-.quiz-header-text p { font-size: 13px; color: var(--muted); margin-top: 2px; }
-.quiz-body { padding: 26px; }
-.quiz-intro { background: var(--accent-2-dim); border: 1px solid rgba(91,155,213,.2); border-radius: 8px; padding: 14px 18px; margin-bottom: 24px; font-size: 13px; color: var(--muted); }
+.quiz-section { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-top: 36px; }
+.quiz-header  { background: linear-gradient(135deg,#152334,#1a2d42); padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
+.quiz-icon    { width: 38px; height: 38px; background: var(--accent-dim); border: 1px solid rgba(240,165,0,.3); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+.quiz-header h3 { font-size: 15px; font-weight: 700; }
+.quiz-header p  { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.quiz-body    { padding: 24px; }
+.quiz-intro   { background: var(--accent-2-dim); border: 1px solid rgba(91,155,213,.2); border-radius: 8px; padding: 13px 17px; margin-bottom: 22px; font-size: 13px; color: var(--muted); }
 
-.q-block { margin-bottom: 26px; }
-.q-num { font-family: var(--font-mono); font-size: 11px; color: var(--accent); margin-bottom: 6px; }
-.q-text { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text); }
-.q-options { display: flex; flex-direction: column; gap: 8px; }
-.q-opt { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: border-color .2s, background .2s; font-size: 13px; }
+.q-block  { margin-bottom: 24px; }
+.q-num    { font-family: var(--font-mono); font-size: 11px; color: var(--accent); margin-bottom: 5px; }
+.q-text   { font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.q-opts   { display: flex; flex-direction: column; gap: 7px; }
+.q-opt    { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: border-color .2s, background .2s; font-size: 13px; user-select: none; }
 .q-opt:hover { border-color: rgba(91,155,213,.4); background: var(--surface-3); }
-.q-opt input[type=radio] { display: none; }
 .q-opt.selected { border-color: var(--accent-2); background: var(--accent-2-dim); }
-.q-opt.correct  { border-color: var(--success); background: var(--success-dim); }
-.q-opt.wrong    { border-color: var(--danger);  background: var(--danger-dim);  }
-.opt-bullet { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--muted); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: border-color .2s; }
-.q-opt.selected .opt-bullet { border-color: var(--accent-2); background: var(--accent-2); }
-.q-opt.correct  .opt-bullet { border-color: var(--success); background: var(--success); }
-.q-opt.wrong    .opt-bullet { border-color: var(--danger);  background: var(--danger);  }
+.q-opt.correct  { border-color: var(--success);  background: var(--success-dim);  pointer-events: none; }
+.q-opt.wrong    { border-color: var(--danger);   background: var(--danger-dim);   pointer-events: none; }
+.q-opt.locked-opt { pointer-events: none; }
+.bullet { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--muted); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; transition: all .2s; }
+.q-opt.selected .bullet { border-color: var(--accent-2); background: var(--accent-2); }
+.q-opt.correct  .bullet { border-color: var(--success);  background: var(--success);  color: #fff; }
+.q-opt.wrong    .bullet { border-color: var(--danger);   background: var(--danger);   color: #fff; }
 
-.quiz-user-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
-.q-field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
-.q-field input { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 14px; font-family: var(--font-body); transition: border-color .2s; outline: none; }
-.q-field input:focus { border-color: var(--accent-2); }
+.quiz-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+.qf label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-weight: 500; }
+.qf input { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 14px; font-family: var(--font-body); outline: none; transition: border-color .2s; }
+.qf input:focus { border-color: var(--accent-2); }
 
-.quiz-submit-btn { width: 100%; padding: 13px; background: var(--accent); color: #0D1B2A; font-size: 14px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: opacity .2s, transform .1s; font-family: var(--font-body); }
-.quiz-submit-btn:hover { opacity: .9; }
-.quiz-submit-btn:active { transform: scale(.99); }
-.quiz-submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+.submit-btn { width: 100%; padding: 13px; background: var(--accent); color: #0D1B2A; font-size: 14px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; font-family: var(--font-body); transition: opacity .2s; }
+.submit-btn:hover { opacity: .9; }
+.submit-btn:disabled { opacity: .45; cursor: not-allowed; }
 
-.quiz-result { display: none; padding: 24px 26px; background: var(--surface-2); border-top: 1px solid var(--border); }
-.result-score { font-size: 42px; font-weight: 800; font-family: var(--font-mono); }
-.result-label { font-size: 14px; color: var(--muted); margin-top: 4px; }
-.result-bar { height: 6px; background: var(--surface-3); border-radius: 3px; margin: 14px 0; overflow: hidden; }
-.result-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
-.result-pass  .result-score { color: var(--success); }
-.result-fail  .result-score { color: var(--danger); }
-.result-pass  .result-fill  { background: var(--success); }
-.result-fail  .result-fill  { background: var(--danger); }
-.result-msg { font-size: 14px; margin-bottom: 6px; font-weight: 600; }
-.result-sub { font-size: 13px; color: var(--muted); }
-.result-sending { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-top: 10px; }
+.quiz-result { display: none; padding: 22px 24px; border-top: 1px solid var(--border); }
+.r-score  { font-size: 40px; font-weight: 800; font-family: var(--font-mono); }
+.r-label  { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.r-bar    { height: 6px; background: var(--surface-3); border-radius: 3px; margin: 12px 0; overflow: hidden; }
+.r-fill   { height: 100%; border-radius: 3px; transition: width 1s ease; }
+.r-msg    { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.r-sub    { font-size: 13px; color: var(--muted); }
+.result-pass .r-score { color: var(--success); }
+.result-fail .r-score { color: var(--danger); }
+.result-pass .r-fill  { background: var(--success); }
+.result-fail .r-fill  { background: var(--danger); }
 
-/* QUICK REF TABLE */
-.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 14px; }
-.ref-table th { background: var(--surface-3); padding: 10px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-.ref-table td { padding: 11px 14px; border-top: 1px solid var(--border); vertical-align: top; }
-.ref-table tr:hover td { background: rgba(255,255,255,.02); }
+.next-btn { display: none; margin-top: 18px; width: 100%; padding: 13px; background: var(--success); color: #fff; font-size: 14px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; font-family: var(--font-body); transition: opacity .2s; }
+.next-btn:hover { opacity: .9; }
+.r-sending { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-top: 10px; }
+
+/* OVERVIEW GRID */
+.ov-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 10px; margin-bottom: 26px; }
+.ov-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.ov-lbl  { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing:.07em; margin-bottom:3px; }
+.ov-val  { font-size: 14px; font-weight: 600; }
 
 @media(max-width:600px) {
-  .quiz-user-fields { grid-template-columns: 1fr; }
-  .hero-title { font-size: 24px; }
-  .sec-title { font-size: 20px; }
+  .quiz-fields { grid-template-columns: 1fr; }
+  .hero-title  { font-size: 22px; }
+  .sec-title   { font-size: 20px; }
   .wrap { padding: 0 16px; }
 }
 </style>
 </head>
 <body>
-
 <div class="top-bar"></div>
 
 <!-- HERO -->
@@ -188,848 +197,1063 @@ ul.kt-list li strong { color: var(--text); }
 <div class="hero">
   <div class="hero-eye">NxtWave · NKB Admin Panel</div>
   <h1 class="hero-title">Events Training <span>Hub</span></h1>
-  <p class="hero-sub">Complete knowledge transfer for event configuration — watch each module's video, read the guide, then take the quiz.</p>
-  <div class="hero-meta">
-    <div class="hero-badge"><span class="dot dot-amber"></span>Module 01 — Events Management</div>
-    <div class="hero-badge"><span class="dot dot-blue"></span>Module 02 — Event Certificates</div>
-    <div class="hero-badge"><span class="dot dot-green"></span>Module 03 — Event Pass</div>
+  <p class="hero-sub">Complete each module in order — watch the video, read the guide, then pass the quiz (3/5) to unlock the next module.</p>
+  <div class="progress-wrap">
+    <div class="progress-label"><span id="prog-text">0 of 6 modules completed</span><span id="prog-pct">0%</span></div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
   </div>
 </div>
 </div>
 
 <!-- TAB NAV -->
 <nav class="tab-nav">
-  <div class="wrap">
-    <button class="tab-btn active" data-m="1" onclick="showModule(1)">
-      <span class="tab-num">MODULE 01</span>Events Management
-    </button>
-    <button class="tab-btn" data-m="2" onclick="showModule(2)">
-      <span class="tab-num">MODULE 02</span>Event Certificates
-    </button>
-    <button class="tab-btn" data-m="3" onclick="showModule(3)">
-      <span class="tab-num">MODULE 03</span>Event Pass
-    </button>
-  </div>
+<div class="wrap">
+  <button class="tab-btn active" data-m="1" onclick="goModule(1)">
+    <span class="tab-num" id="tnum-1">MODULE 01</span>Create Event
+  </button>
+  <button class="tab-btn locked" data-m="2" onclick="goModule(2)">
+    <span class="tab-num" id="tnum-2"><span class="lock-icon">🔒</span> MODULE 02</span>Registration Form
+  </button>
+  <button class="tab-btn locked" data-m="3" onclick="goModule(3)">
+    <span class="tab-num" id="tnum-3"><span class="lock-icon">🔒</span> MODULE 03</span>Submission Form
+  </button>
+  <button class="tab-btn locked" data-m="4" onclick="goModule(4)">
+    <span class="tab-num" id="tnum-4"><span class="lock-icon">🔒</span> MODULE 04</span>Approve &amp; Reject
+  </button>
+  <button class="tab-btn locked" data-m="5" onclick="goModule(5)">
+    <span class="tab-num" id="tnum-5"><span class="lock-icon">🔒</span> MODULE 05</span>Event Certificates
+  </button>
+  <button class="tab-btn locked" data-m="6" onclick="goModule(6)">
+    <span class="tab-num" id="tnum-6"><span class="lock-icon">🔒</span> MODULE 06</span>Event Pass
+  </button>
+</div>
 </nav>
 
-<!-- ═══════════════════════════ MODULE 1 ═══════════════════════════ -->
+
+<!-- ══════════════ MODULE 1 — CREATE EVENT ══════════════ -->
 <div class="module active" id="module-1">
 <div class="wrap">
-
   <div class="sec-head">
-    <div class="sec-label">Module 01</div>
-    <div class="sec-title">Events Management</div>
-    <div class="sec-sub">Creating events, registration forms, project submission forms, and managing approvals</div>
+    <div class="sec-label">Module 01 of 06</div>
+    <div class="sec-title">Create an Event</div>
+    <div class="sec-sub">Learn how to set up a new event in the NKB Admin Panel from scratch</div>
   </div>
 
-  <!-- VIDEO -->
   <div class="video-box">
-    <div class="video-header">
-      <span class="icon">▶</span>
-      <strong>Module 01 — Walkthrough Video</strong>
-      <span>Watch before taking the quiz</span>
-    </div>
+    <div class="video-header"><span>▶</span><strong>Module 01 — Create Event Walkthrough</strong><span>Watch before the quiz</span></div>
     <div class="video-frame">
-      <div class="video-placeholder">
-        <div class="play-icon">▶</div>
-        <p>Video coming soon — will be embedded here</p>
+      <div class="video-placeholder"><div class="play">▶</div><p>Video will be embedded here</p></div>
+    </div>
+  </div>
+
+  <div class="ov-grid">
+    <div class="ov-card"><div class="ov-lbl">Admin Panel</div><div class="ov-val">Django Admin</div></div>
+    <div class="ov-card"><div class="ov-lbl">Section</div><div class="ov-val">NKB Events</div></div>
+    <div class="ov-card"><div class="ov-lbl">Action</div><div class="ov-val">Add Event</div></div>
+    <div class="ov-card"><div class="ov-lbl">Roles</div><div class="ov-val">Admin / Ops</div></div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <div class="step-title">Navigate to Event Creation <span class="badge">REQUIRED</span></div>
+        <ul class="kl">
+          <li>Log in to the <strong>Django Admin Panel</strong></li>
+          <li>Navigate to <strong>NKB Events → Events</strong></li>
+          <li>Click <strong>"Add Event"</strong> in the top right corner</li>
+        </ul>
       </div>
     </div>
   </div>
 
-  <!-- OVERVIEW -->
-  <div class="overview-grid">
-    <div class="ov-card"><div class="ov-label">Admin Panel</div><div class="ov-value">Django Admin</div></div>
-    <div class="ov-card"><div class="ov-label">Section</div><div class="ov-value">NKB Events</div></div>
-    <div class="ov-card"><div class="ov-label">Steps Covered</div><div class="ov-value">5 Core Steps</div></div>
-    <div class="ov-card"><div class="ov-label">Roles</div><div class="ov-value">Admin / Ops</div></div>
-  </div>
-
-  <!-- STEP 1 -->
   <div class="step-card">
     <div class="step-rail">
-      <div class="step-number"><span class="step-num-txt">01</span></div>
+      <div class="step-num">02</div>
       <div class="step-body">
-        <div class="step-title">Create an Event <span class="step-badge">REQUIRED FIRST</span></div>
-        <ul class="kt-list">
-          <li>Navigate to <strong>Django Admin → NKB Events → Events</strong></li>
-          <li>Click <strong>"Add Event"</strong> to open the event creation form</li>
-          <li>Fill in all required fields: Event Name, Description, Start/End Date & Time, Visibility Status</li>
-          <li>Set <strong>Participation Type</strong> (Individual or Team)</li>
-          <li>Add <strong>Short Text</strong> for student-facing display</li>
-          <li>Set <strong>Enroll Plans Str</strong> to the appropriate enrollment plan (e.g. NIAT)</li>
+        <div class="step-title">Fill in Event Details</div>
+        <table class="ft">
+          <thead><tr><th>Field</th><th>Description</th><th>Required</th></tr></thead>
+          <tbody>
+            <tr><td><span class="fn">Event Name</span></td><td>The display name of the event</td><td><span class="req">Yes</span></td></tr>
+            <tr><td><span class="fn">Description</span></td><td>Full event description shown to students</td><td><span class="req">Yes</span></td></tr>
+            <tr><td><span class="fn">Start / End Date &amp; Time</span></td><td>When the event runs</td><td><span class="req">Yes</span></td></tr>
+            <tr><td><span class="fn">Visibility Status</span></td><td>Set to <code>PUBLIC</code> for students to see it</td><td><span class="req">Yes</span></td></tr>
+            <tr><td><span class="fn">Participation Type</span></td><td><code>INDIVIDUAL</code> or <code>TEAM</code></td><td><span class="req">Yes</span></td></tr>
+            <tr><td><span class="fn">Short Text</span></td><td>Brief text shown on the student-facing event card</td><td>Yes</td></tr>
+            <tr><td><span class="fn">Enroll Plans Str</span></td><td>Eligibility plan — e.g. <code>NIAT</code> for NIAT events</td><td>Yes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <div class="step-title">Save and Copy the Event ID</div>
+        <ul class="kl">
           <li>Click <strong>Save</strong> — the event is now created</li>
+          <li>After saving, you will see the event detail page with the <strong>Event ID</strong> in the URL</li>
+          <li>Copy and save this Event ID — it is needed for certificate configuration later</li>
         </ul>
         <div class="callout warn">
-          <span class="callout-icon">📌</span>
-          <span>Copy and save the Event ID after saving — you will need it for certificate configuration later.</span>
+          <span>📌</span>
+          <span>Always copy the Event ID immediately after saving. You will need it in Module 05 (Certificate Configuration).</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- STEP 2 -->
+  <div class="quiz-section">
+    <div class="quiz-header">
+      <div class="quiz-icon">📝</div>
+      <div><h3>Module 01 Quiz — Create Event</h3><p>Minimum 3/5 to unlock Module 02</p></div>
+    </div>
+    <div class="quiz-body">
+      <div class="quiz-intro">Complete this quiz to unlock the next module. You need at least 3 out of 5 correct.</div>
+      <div class="quiz-fields">
+        <div class="qf"><label>Full Name <span class="req">*</span></label><input type="text" id="n1" placeholder="Your full name"></div>
+        <div class="qf"><label>Gmail <span class="req">*</span></label><input type="email" id="e1" placeholder="yourname@gmail.com"></div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q1 / 5</div>
+        <div class="q-text">To create a new event, which path do you follow in the Admin Panel?</div>
+        <div class="q-opts" id="m1q1">
+          <div class="q-opt" onclick="pick(this,'m1q1','a')" data-val="a"><div class="bullet"></div>Django Admin → NKB Events → Registrations</div>
+          <div class="q-opt" onclick="pick(this,'m1q1','b')" data-val="b"><div class="bullet"></div>Django Admin → NKB Events → Events → Add Event</div>
+          <div class="q-opt" onclick="pick(this,'m1q1','c')" data-val="c"><div class="bullet"></div>Django Admin → NKB Events → Certificates → Add</div>
+          <div class="q-opt" onclick="pick(this,'m1q1','d')" data-val="d"><div class="bullet"></div>Django Admin → Users → Events</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q2 / 5</div>
+        <div class="q-text">Which field controls who is eligible to see and join the event?</div>
+        <div class="q-opts" id="m1q2">
+          <div class="q-opt" onclick="pick(this,'m1q2','a')" data-val="a"><div class="bullet"></div>Short Text</div>
+          <div class="q-opt" onclick="pick(this,'m1q2','b')" data-val="b"><div class="bullet"></div>Visibility Status</div>
+          <div class="q-opt" onclick="pick(this,'m1q2','c')" data-val="c"><div class="bullet"></div>Enroll Plans Str</div>
+          <div class="q-opt" onclick="pick(this,'m1q2','d')" data-val="d"><div class="bullet"></div>Participation Type</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q3 / 5</div>
+        <div class="q-text">What should you do immediately after saving a new event?</div>
+        <div class="q-opts" id="m1q3">
+          <div class="q-opt" onclick="pick(this,'m1q3','a')" data-val="a"><div class="bullet"></div>Add a certificate template right away</div>
+          <div class="q-opt" onclick="pick(this,'m1q3','b')" data-val="b"><div class="bullet"></div>Approve all registrations</div>
+          <div class="q-opt" onclick="pick(this,'m1q3','c')" data-val="c"><div class="bullet"></div>Copy and save the Event ID</div>
+          <div class="q-opt" onclick="pick(this,'m1q3','d')" data-val="d"><div class="bullet"></div>Send email notifications to students</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q4 / 5</div>
+        <div class="q-text">What does the "Short Text" field do?</div>
+        <div class="q-opts" id="m1q4">
+          <div class="q-opt" onclick="pick(this,'m1q4','a')" data-val="a"><div class="bullet"></div>Sets the event's internal admin notes</div>
+          <div class="q-opt" onclick="pick(this,'m1q4','b')" data-val="b"><div class="bullet"></div>Brief text shown on the student-facing event card</div>
+          <div class="q-opt" onclick="pick(this,'m1q4','c')" data-val="c"><div class="bullet"></div>Configures the certificate template name</div>
+          <div class="q-opt" onclick="pick(this,'m1q4','d')" data-val="d"><div class="bullet"></div>Sets the registration form title</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q5 / 5</div>
+        <div class="q-text">For an NIAT event, what value should be entered in "Enroll Plans Str"?</div>
+        <div class="q-opts" id="m1q5">
+          <div class="q-opt" onclick="pick(this,'m1q5','a')" data-val="a"><div class="bullet"></div>DEFAULT</div>
+          <div class="q-opt" onclick="pick(this,'m1q5','b')" data-val="b"><div class="bullet"></div>NXTWAVE</div>
+          <div class="q-opt" onclick="pick(this,'m1q5','c')" data-val="c"><div class="bullet"></div>NIAT</div>
+          <div class="q-opt" onclick="pick(this,'m1q5','d')" data-val="d"><div class="bullet"></div>PUBLIC</div>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="submitQuiz(1)" id="sbtn-1">Submit Quiz</button>
+    </div>
+    <div class="quiz-result" id="qres-1">
+      <button class="next-btn" id="next-1" onclick="goModule(2)">Continue to Module 02 — Registration Form →</button>
+    </div>
+  </div>
+</div></div>
+
+
+<!-- ══════════════ MODULE 2 — REGISTRATION FORM ══════════════ -->
+<div class="module" id="module-2">
+<div class="wrap">
+  <div class="sec-head">
+    <div class="sec-label">Module 02 of 06</div>
+    <div class="sec-title">Add a Registration Form</div>
+    <div class="sec-sub">Configure the form that students fill when registering for an event</div>
+  </div>
+
+  <div class="video-box">
+    <div class="video-header"><span>▶</span><strong>Module 02 — Registration Form Walkthrough</strong><span>Watch before the quiz</span></div>
+    <div class="video-frame">
+      <div class="video-placeholder"><div class="play">▶</div><p>Video will be embedded here</p></div>
+    </div>
+  </div>
+
   <div class="step-card">
     <div class="step-rail">
-      <div class="step-number"><span class="step-num-txt">02</span></div>
+      <div class="step-num">01</div>
       <div class="step-body">
-        <div class="step-title">Add a Registration Form</div>
-        <ul class="kt-list">
-          <li>While editing the event, locate the <strong>Event Registration Form</strong> section</li>
+        <div class="step-title">Open the Event for Editing</div>
+        <ul class="kl">
+          <li>Go to <strong>NKB Events → Events</strong> and open the event you created</li>
+          <li>Click <strong>Edit</strong> or click the event name to open the edit form</li>
+          <li>Scroll down to find the <strong>Event Registration Form</strong> section</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <div class="step-title">Add the Registration Form <span class="badge">OPTIONAL</span></div>
+        <ul class="kl">
           <li>Click <strong>"Add another Event Registration Form"</strong></li>
-          <li>Select or create the form that students will fill when registering</li>
-          <li>Fields in the form typically include: Name, College, Year, Contact details</li>
-          <li>Save the event after adding the form</li>
+          <li>Select or create the form students will complete upon registering</li>
+          <li>Typical fields: Name, College, Year of Study, Contact Number</li>
+          <li>Click <strong>Save</strong> after adding the form</li>
         </ul>
         <div class="callout info">
-          <span class="callout-icon">ℹ</span>
-          <span>If no registration form is added, students can still register but will not be prompted to fill any details.</span>
+          <span>ℹ</span>
+          <span>If no registration form is added, students can still register for the event but will not be prompted to fill in any details.</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- STEP 3 -->
+  <div class="quiz-section">
+    <div class="quiz-header">
+      <div class="quiz-icon">📝</div>
+      <div><h3>Module 02 Quiz — Registration Form</h3><p>Minimum 3/5 to unlock Module 03</p></div>
+    </div>
+    <div class="quiz-body">
+      <div class="quiz-intro">Complete this quiz to unlock the next module. You need at least 3 out of 5 correct.</div>
+      <div class="quiz-fields">
+        <div class="qf"><label>Full Name <span class="req">*</span></label><input type="text" id="n2" placeholder="Your full name"></div>
+        <div class="qf"><label>Gmail <span class="req">*</span></label><input type="email" id="e2" placeholder="yourname@gmail.com"></div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q1 / 5</div>
+        <div class="q-text">Where is the Event Registration Form section located?</div>
+        <div class="q-opts" id="m2q1">
+          <div class="q-opt" onclick="pick(this,'m2q1','a')" data-val="a"><div class="bullet"></div>A separate menu under NKB Events → Forms</div>
+          <div class="q-opt" onclick="pick(this,'m2q1','b')" data-val="b"><div class="bullet"></div>Within the event edit page</div>
+          <div class="q-opt" onclick="pick(this,'m2q1','c')" data-val="c"><div class="bullet"></div>In the Poster Generation service</div>
+          <div class="q-opt" onclick="pick(this,'m2q1','d')" data-val="d"><div class="bullet"></div>Under Django Admin → Users</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q2 / 5</div>
+        <div class="q-text">What button do you click to add a registration form to an event?</div>
+        <div class="q-opts" id="m2q2">
+          <div class="q-opt" onclick="pick(this,'m2q2','a')" data-val="a"><div class="bullet"></div>"Create New Form" in a separate portal</div>
+          <div class="q-opt" onclick="pick(this,'m2q2','b')" data-val="b"><div class="bullet"></div>"Add another Event Registration Form"</div>
+          <div class="q-opt" onclick="pick(this,'m2q2','c')" data-val="c"><div class="bullet"></div>"Import from Google Form"</div>
+          <div class="q-opt" onclick="pick(this,'m2q2','d')" data-val="d"><div class="bullet"></div>"Enable Registration"</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q3 / 5</div>
+        <div class="q-text">What happens if no registration form is added to an event?</div>
+        <div class="q-opts" id="m2q3">
+          <div class="q-opt" onclick="pick(this,'m2q3','a')" data-val="a"><div class="bullet"></div>The event cannot be published</div>
+          <div class="q-opt" onclick="pick(this,'m2q3','b')" data-val="b"><div class="bullet"></div>Students can still register but won't fill any details</div>
+          <div class="q-opt" onclick="pick(this,'m2q3','c')" data-val="c"><div class="bullet"></div>Students are automatically rejected</div>
+          <div class="q-opt" onclick="pick(this,'m2q3','d')" data-val="d"><div class="bullet"></div>The event is automatically deleted</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q4 / 5</div>
+        <div class="q-text">Is adding a registration form mandatory for every event?</div>
+        <div class="q-opts" id="m2q4">
+          <div class="q-opt" onclick="pick(this,'m2q4','a')" data-val="a"><div class="bullet"></div>Yes, it is required for all events</div>
+          <div class="q-opt" onclick="pick(this,'m2q4','b')" data-val="b"><div class="bullet"></div>No, it is optional</div>
+          <div class="q-opt" onclick="pick(this,'m2q4','c')" data-val="c"><div class="bullet"></div>Only required for NIAT events</div>
+          <div class="q-opt" onclick="pick(this,'m2q4','d')" data-val="d"><div class="bullet"></div>Only required for team events</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q5 / 5</div>
+        <div class="q-text">After adding the registration form, what must you do to save the change?</div>
+        <div class="q-opts" id="m2q5">
+          <div class="q-opt" onclick="pick(this,'m2q5','a')" data-val="a"><div class="bullet"></div>Click "Publish Event"</div>
+          <div class="q-opt" onclick="pick(this,'m2q5','b')" data-val="b"><div class="bullet"></div>Click Save on the event page</div>
+          <div class="q-opt" onclick="pick(this,'m2q5','c')" data-val="c"><div class="bullet"></div>Email the admin team</div>
+          <div class="q-opt" onclick="pick(this,'m2q5','d')" data-val="d"><div class="bullet"></div>It saves automatically</div>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="submitQuiz(2)" id="sbtn-2">Submit Quiz</button>
+    </div>
+    <div class="quiz-result" id="qres-2">
+      <button class="next-btn" id="next-2" onclick="goModule(3)">Continue to Module 03 — Submission Form →</button>
+    </div>
+  </div>
+</div></div>
+
+
+<!-- ══════════════ MODULE 3 — SUBMISSION FORM ══════════════ -->
+<div class="module" id="module-3">
+<div class="wrap">
+  <div class="sec-head">
+    <div class="sec-label">Module 03 of 06</div>
+    <div class="sec-title">Add a Project Submission Form</div>
+    <div class="sec-sub">Configure the form for students to submit their project work for evaluation</div>
+  </div>
+
+  <div class="video-box">
+    <div class="video-header"><span>▶</span><strong>Module 03 — Submission Form Walkthrough</strong><span>Watch before the quiz</span></div>
+    <div class="video-frame">
+      <div class="video-placeholder"><div class="play">▶</div><p>Video will be embedded here</p></div>
+    </div>
+  </div>
+
   <div class="step-card">
     <div class="step-rail">
-      <div class="step-number"><span class="step-num-txt">03</span></div>
+      <div class="step-num">01</div>
       <div class="step-body">
-        <div class="step-title">Add a Project Submission Form</div>
-        <ul class="kt-list">
-          <li>In the event edit page, locate the <strong>Event Project Submission Form</strong> section</li>
+        <div class="step-title">Locate the Submission Form Section</div>
+        <ul class="kl">
+          <li>Open the event in edit mode from <strong>NKB Events → Events</strong></li>
+          <li>Scroll to the <strong>Event Project Submission Form</strong> section</li>
+          <li>This is separate from the Registration Form section</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <div class="step-title">Add the Submission Form <span class="badge">OPTIONAL</span></div>
+        <ul class="kl">
           <li>Click <strong>"Add another Event Project Submission Form"</strong></li>
-          <li>Select the form students will use to submit their project work</li>
-          <li>Configure any deadline or submission window if required</li>
-          <li>Save the event</li>
+          <li>Select the form students will use to submit their project</li>
+          <li>Configure any submission deadline or window if needed</li>
+          <li>Click <strong>Save</strong> after adding the form</li>
         </ul>
         <div class="callout info">
-          <span class="callout-icon">ℹ</span>
-          <span>This step is optional — only add it if the event requires students to submit a project.</span>
+          <span>ℹ</span>
+          <span>This step is optional — only add it if the event specifically requires project submission from students.</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- STEP 4 -->
+  <div class="quiz-section">
+    <div class="quiz-header">
+      <div class="quiz-icon">📝</div>
+      <div><h3>Module 03 Quiz — Submission Form</h3><p>Minimum 3/5 to unlock Module 04</p></div>
+    </div>
+    <div class="quiz-body">
+      <div class="quiz-intro">Complete this quiz to unlock the next module. You need at least 3 out of 5 correct.</div>
+      <div class="quiz-fields">
+        <div class="qf"><label>Full Name <span class="req">*</span></label><input type="text" id="n3" placeholder="Your full name"></div>
+        <div class="qf"><label>Gmail <span class="req">*</span></label><input type="email" id="e3" placeholder="yourname@gmail.com"></div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q1 / 5</div>
+        <div class="q-text">What is the purpose of the Project Submission Form?</div>
+        <div class="q-opts" id="m3q1">
+          <div class="q-opt" onclick="pick(this,'m3q1','a')" data-val="a"><div class="bullet"></div>For students to register for the event</div>
+          <div class="q-opt" onclick="pick(this,'m3q1','b')" data-val="b"><div class="bullet"></div>For students to submit their project work for evaluation</div>
+          <div class="q-opt" onclick="pick(this,'m3q1','c')" data-val="c"><div class="bullet"></div>For admins to configure the event certificate</div>
+          <div class="q-opt" onclick="pick(this,'m3q1','d')" data-val="d"><div class="bullet"></div>For students to share their certificate</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q2 / 5</div>
+        <div class="q-text">What button do you click to add a submission form to an event?</div>
+        <div class="q-opts" id="m3q2">
+          <div class="q-opt" onclick="pick(this,'m3q2','a')" data-val="a"><div class="bullet"></div>"Add another Event Registration Form"</div>
+          <div class="q-opt" onclick="pick(this,'m3q2','b')" data-val="b"><div class="bullet"></div>"Add another Event Project Submission Form"</div>
+          <div class="q-opt" onclick="pick(this,'m3q2','c')" data-val="c"><div class="bullet"></div>"Enable Project Submission"</div>
+          <div class="q-opt" onclick="pick(this,'m3q2','d')" data-val="d"><div class="bullet"></div>"Import Submission Form"</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q3 / 5</div>
+        <div class="q-text">Is the Project Submission Form required for all events?</div>
+        <div class="q-opts" id="m3q3">
+          <div class="q-opt" onclick="pick(this,'m3q3','a')" data-val="a"><div class="bullet"></div>Yes, every event needs one</div>
+          <div class="q-opt" onclick="pick(this,'m3q3','b')" data-val="b"><div class="bullet"></div>No, only for events that require project submission</div>
+          <div class="q-opt" onclick="pick(this,'m3q3','c')" data-val="c"><div class="bullet"></div>Yes, but only for NIAT events</div>
+          <div class="q-opt" onclick="pick(this,'m3q3','d')" data-val="d"><div class="bullet"></div>No, it is automatically added with the registration form</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q4 / 5</div>
+        <div class="q-text">Where is the Project Submission Form section in the Admin Panel?</div>
+        <div class="q-opts" id="m3q4">
+          <div class="q-opt" onclick="pick(this,'m3q4','a')" data-val="a"><div class="bullet"></div>A separate tab under NKB Certificates</div>
+          <div class="q-opt" onclick="pick(this,'m3q4','b')" data-val="b"><div class="bullet"></div>Within the event edit page</div>
+          <div class="q-opt" onclick="pick(this,'m3q4','c')" data-val="c"><div class="bullet"></div>Under Django Admin → Student Projects</div>
+          <div class="q-opt" onclick="pick(this,'m3q4','d')" data-val="d"><div class="bullet"></div>In the Poster Generation service</div>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <div class="q-num">Q5 / 5</div>
+        <div class="q-text">After adding the submission form, what must you do?</div>
+        <div class="q-opts" id="m3q5">
+          <div class="q-opt" onclick="pick(this,'m3q5','a')" data-val="a"><div class="bullet"></div>Immediately approve all registrations</div>
+          <div class="q-opt" onclick="pick(this,'m3q5','b')" data-val="b"><div class="bullet"></div>Save the event</div>
+          <div class="q-opt" onclick="pick(this,'m3q5','c')" data-val="c"><div class="bullet"></div>Delete the registration form</div>
+          <div class="q-opt" onclick="pick(this,'m3q5','d')" data-val="d"><div class="bullet"></div>Generate certificates for all students</div>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="submitQuiz(3)" id="sbtn-3">Submit Quiz</button>
+    </div>
+    <div class="quiz-result" id="qres-3">
+      <button class="next-btn" id="next-3" onclick="goModule(4)">Continue to Module 04 — Approve &amp; Reject →</button>
+    </div>
+  </div>
+</div></div>
+
+
+<!-- ══════════════ MODULE 4 — APPROVE & REJECT ══════════════ -->
+<div class="module" id="module-4">
+<div class="wrap">
+  <div class="sec-head">
+    <div class="sec-label">Module 04 of 06</div>
+    <div class="sec-title">Approve &amp; Reject Registrations</div>
+    <div class="sec-sub">Review student registrations and manage their status in the Admin Panel</div>
+  </div>
+
+  <div class="video-box">
+    <div class="video-header"><span>▶</span><strong>Module 04 — Approve &amp; Reject Walkthrough</strong><span>Watch before the quiz</span></div>
+    <div class="video-frame">
+      <div class="video-placeholder"><div class="play">▶</div><p>Video will be embedded here</p></div>
+    </div>
+  </div>
+
   <div class="step-card">
     <div class="step-rail">
-      <div class="step-number"><span class="step-num-txt">04</span></div>
+      <div class="step-num">01</div>
       <div class="step-body">
-        <div class="step-title">Approve a Registration</div>
-        <ul class="kt-list">
-          <li>Go to <strong>NKB Events → Events → [Select Event] → Registrations</strong></li>
-          <li>You will see a list of all students who have registered</li>
+        <div class="step-title">Access Registrations List</div>
+        <ul class="kl">
+          <li>Go to <strong>NKB Events → Events</strong> and select the event</li>
+          <li>Open the <strong>Registrations</strong> section for that event</li>
+          <li>You will see all students who have registered with their current status</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-rail">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <div class="step-title">Approve a Registration <span class="badge">APPROVE</span></div>
+        <ul class="kl">
           <li>Click on a registration entry to open it</li>
           <li>Review the student's form responses</li>
-          <li>Change the <strong>Status</strong> to <strong>Approved</strong></li>
-          <li>Click <strong>Save</strong> — the student's registration is confirmed</li>
+          <li>Change the <strong>Status</strong> field to <strong>Approved</strong></li>
+          <li>Click <strong>Save</strong></li>
         </ul>
         <div class="callout ok">
-          <span class="callout-icon">✓</span>
+          <span>✓</span>
           <span>Once approved, the student can see the event as active and will receive any configured event pass.</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- STEP 5 -->
   <div class="step-card">
     <div class="step-rail">
-      <div class="step-number"><span class="step-num-txt">05</span></div>
+      <div class="step-num">03</div>
       <div class="step-body">
-        <div class="step-title">Reject a Registration</div>
-        <ul class="kt-list">
-          <li>Go to <strong>NKB Events → Events → [Select Event] → Registrations</strong></li>
-          <li>Click on the registration you wish to reject</li>
-          <li>Change the <strong>Status</strong> to <strong>Rejected</strong></li>
-          <li>Optionally add a reason in the notes field</li>
+        <div class="step-title">Reject a Registration <span class="badge">REJECT</span></div>
+        <ul class="kl">
+          <li>Click on the registration entry you wish to reject</li>
+          <li>Change the <strong>Status</strong> field to <strong>Rejected</strong></li>
+          <li>Optionally add a reason in the <strong>Notes</strong> field</li>
           <li>Click <strong>Save</strong></li>
         </ul>
         <div class="callout danger">
-          <span class="callout-icon">✕</span>
-          <span>Rejected students will not be able to access the event. This action can be reversed by setting status back to Approved.</span>
+          <span>✕</span>
+          <span>Rejection can be reversed — set the status back to Approved at any time to reinstate the student.</span>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="divider"></div>
-
-  <h3 style="margin-bottom:14px; font-size:16px;">Quick Reference</h3>
-  <table class="ref-table">
-    <thead><tr><th>Action</th><th>Where</th><th>Notes</th></tr></thead>
-    <tbody>
-      <tr><td>Create Event</td><td>NKB Events → Events → Add Event</td><td>Copy the Event ID after saving</td></tr>
-      <tr><td>Add Registration Form</td><td>Within the Event edit page</td><td>Optional but recommended</td></tr>
-      <tr><td>Add Submission Form</td><td>Within the Event edit page</td><td>Only for project-based events</td></tr>
-      <tr><td>Approve Registration</td><td>Event → Registrations → [Entry] → Status: Approved</td><td>Student gets access</td></tr>
-      <tr><td>Reject Registration</td><td>Event → Registrations → [Entry] → Status: Rejected</td><td>Reversible</td></tr>
-    </tbody>
-  </table>
-
-  <!-- QUIZ 1 -->
-  <div class="quiz-section" id="quiz-1">
+  <div class="quiz-section">
     <div class="quiz-header">
       <div class="quiz-icon">📝</div>
-      <div class="quiz-header-text">
-        <h3>Module 01 Quiz — Events Management</h3>
-        <p>5 questions · Enter your name and Gmail, then answer all questions</p>
-      </div>
+      <div><h3>Module 04 Quiz — Approve &amp; Reject</h3><p>Minimum 3/5 to unlock Module 05</p></div>
     </div>
     <div class="quiz-body">
-      <div class="quiz-intro">Make sure you have watched the video and read the guide above before attempting the quiz. All responses are recorded.</div>
-
-      <div class="quiz-user-fields">
-        <div class="q-field"><label>Full Name <span class="req">*</span></label><input type="text" id="q1-name" placeholder="Your full name"></div>
-        <div class="q-field"><label>Gmail Address <span class="req">*</span></label><input type="email" id="q1-email" placeholder="yourname@gmail.com"></div>
+      <div class="quiz-intro">Complete this quiz to unlock the next module. You need at least 3 out of 5 correct.</div>
+      <div class="quiz-fields">
+        <div class="qf"><label>Full Name <span class="req">*</span></label><input type="text" id="n4" placeholder="Your full name"></div>
+        <div class="qf"><label>Gmail <span class="req">*</span></label><input type="email" id="e4" placeholder="yourname@gmail.com"></div>
       </div>
 
-      <!-- Q1 -->
       <div class="q-block">
-        <div class="q-num">QUESTION 01 / 05</div>
-        <div class="q-text">To create a new event, which path do you follow in the Admin Panel?</div>
-        <div class="q-options" id="q1-q1">
-          <div class="q-opt" onclick="selectOpt(this,'q1-q1','a')"><input type="radio" name="q1q1" value="a"><div class="opt-bullet"></div>Django Admin → NKB Events → Registrations</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q1','b')"><input type="radio" name="q1q1" value="b"><div class="opt-bullet"></div>Django Admin → NKB Events → Events → Add Event</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q1','c')"><input type="radio" name="q1q1" value="c"><div class="opt-bullet"></div>Django Admin → NKB Events → Certificates → Add</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q1','d')"><input type="radio" name="q1q1" value="d"><div class="opt-bullet"></div>Django Admin → Users → Events</div>
+        <div class="q-num">Q1 / 5</div>
+        <div class="q-text">Where do you find the list of student registrations for an event?</div>
+        <div class="q-opts" id="m4q1">
+          <div class="q-opt" onclick="pick(this,'m4q1','a')" data-val="a"><div class="bullet"></div>NKB Events → Events → [Event] → Registrations</div>
+          <div class="q-opt" onclick="pick(this,'m4q1','b')" data-val="b"><div class="bullet"></div>Django Admin → Users → Registrations</div>
+          <div class="q-opt" onclick="pick(this,'m4q1','c')" data-val="c"><div class="bullet"></div>NKB Events → Certificates → Pending</div>
+          <div class="q-opt" onclick="pick(this,'m4q1','d')" data-val="d"><div class="bullet"></div>NKB Events → Events → Edit Event → Forms</div>
         </div>
       </div>
 
-      <!-- Q2 -->
       <div class="q-block">
-        <div class="q-num">QUESTION 02 / 05</div>
-        <div class="q-text">Which form collects student project work for evaluation?</div>
-        <div class="q-options" id="q1-q2">
-          <div class="q-opt" onclick="selectOpt(this,'q1-q2','a')"><input type="radio" name="q1q2" value="a"><div class="opt-bullet"></div>Registration Form</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q2','b')"><input type="radio" name="q1q2" value="b"><div class="opt-bullet"></div>Event Certificate Form</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q2','c')"><input type="radio" name="q1q2" value="c"><div class="opt-bullet"></div>Project Submission Form</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q2','d')"><input type="radio" name="q1q2" value="d"><div class="opt-bullet"></div>Enrollment Form</div>
+        <div class="q-num">Q2 / 5</div>
+        <div class="q-text">What status do you set to confirm a student's registration?</div>
+        <div class="q-opts" id="m4q2">
+          <div class="q-opt" onclick="pick(this,'m4q2','a')" data-val="a"><div class="bullet"></div>Confirmed</div>
+          <div class="q-opt" onclick="pick(this,'m4q2','b')" data-val="b"><div class="bullet"></div>Active</div>
+          <div class="q-opt" onclick="pick(this,'m4q2','c')" data-val="c"><div class="bullet"></div>Approved</div>
+          <div class="q-opt" onclick="pick(this,'m4q2','d')" data-val="d"><div class="bullet"></div>Verified</div>
         </div>
       </div>
 
-      <!-- Q3 -->
       <div class="q-block">
-        <div class="q-num">QUESTION 03 / 05</div>
-        <div class="q-text">Where do you go to approve or reject a student's registration?</div>
-        <div class="q-options" id="q1-q3">
-          <div class="q-opt" onclick="selectOpt(this,'q1-q3','a')"><input type="radio" name="q1q3" value="a"><div class="opt-bullet"></div>NKB Events → Events → Edit Event</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q3','b')"><input type="radio" name="q1q3" value="b"><div class="opt-bullet"></div>NKB Events → Events → [Event] → Registrations list</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q3','c')"><input type="radio" name="q1q3" value="c"><div class="opt-bullet"></div>NKB Events → Certificates</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q3','d')"><input type="radio" name="q1q3" value="d"><div class="opt-bullet"></div>Django Admin → Users</div>
+        <div class="q-num">Q3 / 5</div>
+        <div class="q-text">Once a student's registration is Approved, what can they do?</div>
+        <div class="q-opts" id="m4q3">
+          <div class="q-opt" onclick="pick(this,'m4q3','a')" data-val="a"><div class="bullet"></div>Nothing changes — they must wait for a separate confirmation email</div>
+          <div class="q-opt" onclick="pick(this,'m4q3','b')" data-val="b"><div class="bullet"></div>They can see the event as active and receive any configured event pass</div>
+          <div class="q-opt" onclick="pick(this,'m4q3','c')" data-val="c"><div class="bullet"></div>They automatically receive a certificate</div>
+          <div class="q-opt" onclick="pick(this,'m4q3','d')" data-val="d"><div class="bullet"></div>They are added to the admin panel as a reviewer</div>
         </div>
       </div>
 
-      <!-- Q4 -->
       <div class="q-block">
-        <div class="q-num">QUESTION 04 / 05</div>
-        <div class="q-text">Can a rejected registration be reversed later?</div>
-        <div class="q-options" id="q1-q4">
-          <div class="q-opt" onclick="selectOpt(this,'q1-q4','a')"><input type="radio" name="q1q4" value="a"><div class="opt-bullet"></div>No — rejection is permanent</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q4','b')"><input type="radio" name="q1q4" value="b"><div class="opt-bullet"></div>Yes — by setting the status back to Approved</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q4','c')"><input type="radio" name="q1q4" value="c"><div class="opt-bullet"></div>Only within 24 hours of rejection</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q4','d')"><input type="radio" name="q1q4" value="d"><div class="opt-bullet"></div>Only by creating a new event</div>
+        <div class="q-num">Q4 / 5</div>
+        <div class="q-text">Can a rejected registration be reversed?</div>
+        <div class="q-opts" id="m4q4">
+          <div class="q-opt" onclick="pick(this,'m4q4','a')" data-val="a"><div class="bullet"></div>No — rejection is permanent</div>
+          <div class="q-opt" onclick="pick(this,'m4q4','b')" data-val="b"><div class="bullet"></div>Yes — by setting the status back to Approved</div>
+          <div class="q-opt" onclick="pick(this,'m4q4','c')" data-val="c"><div class="bullet"></div>Only within 24 hours</div>
+          <div class="q-opt" onclick="pick(this,'m4q4','d')" data-val="d"><div class="bullet"></div>Only by creating a new registration entry</div>
         </div>
       </div>
 
-      <!-- Q5 -->
       <div class="q-block">
-        <div class="q-num">QUESTION 05 / 05</div>
-        <div class="q-text">What is the correct sequence when setting up a new event?</div>
-        <div class="q-options" id="q1-q5">
-          <div class="q-opt" onclick="selectOpt(this,'q1-q5','a')"><input type="radio" name="q1q5" value="a"><div class="opt-bullet"></div>Add Certificate → Create Event → Add Registration Form</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q5','b')"><input type="radio" name="q1q5" value="b"><div class="opt-bullet"></div>Create Event → Approve Registrations → Add Registration Form</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q5','c')"><input type="radio" name="q1q5" value="c"><div class="opt-bullet"></div>Create Event → Add Registration Form → Add Submission Form (if needed)</div>
-          <div class="q-opt" onclick="selectOpt(this,'q1-q5','d')"><input type="radio" name="q1q5" value="d"><div class="opt-bullet"></div>Add Quiz → Add Video → Create Event</div>
+        <div class="q-num">Q5 / 5</div>
+        <div class="q-text">When rejecting a registration, which optional field can you fill to provide context?</div>
+        <div class="q-opts" id="m4q5">
+          <div class="q-opt" onclick="pick(this,'m4q5','a')" data-val="a"><div class="bullet"></div>Certificate Name Enum</div>
+          <div class="q-opt" onclick="pick(this,'m4q5','b')" data-val="b"><div class="bullet"></div>Notes field (reason for rejection)</div>
+          <div class="q-opt" onclick="pick(this,'m4q5','c')" data-val="c"><div class="bullet"></div>Resource ID</div>
+          <div class="q-opt" onclick="pick(this,'m4q5','d')" data-val="d"><div class="bullet"></div>Poster Name Enum</div>
         </div>
       </div>
 
-      <button class="quiz-submit-btn" onclick="submitQuiz(1)" id="btn-1">Submit Quiz</button>
+      <button class="submit-btn" onclick="submitQuiz(4)" id="sbtn-4">Submit Quiz</button>
     </div>
-    <div class="quiz-result" id="result-1"></div>
+    <div class="quiz-result" id="qres-4">
+      <button class="next-btn" id="next-4" onclick="goModule(5)">Continue to Module 05 — Event Certificates →</button>
+    </div>
   </div>
-
-</div><!-- /wrap -->
-</div><!-- /module-1 -->
+</div></div>
 
 
-<!-- ═══════════════════════════ MODULE 2 ═══════════════════════════ -->
-<div class="module" id="module-2">
+<!-- ══════════════ MODULE 5 — EVENT CERTIFICATES ══════════════ -->
+<div class="module" id="module-5">
 <div class="wrap">
-
   <div class="sec-head">
-    <div class="sec-label">Module 02</div>
+    <div class="sec-label">Module 05 of 06</div>
     <div class="sec-title">Configuring Event Certificates</div>
     <div class="sec-sub">End-to-end setup for automatic personalized certificate generation upon event completion</div>
   </div>
 
-  <!-- VIDEO -->
   <div class="video-box">
-    <div class="video-header">
-      <span class="icon">▶</span>
-      <strong>Module 02 — Certificate Configuration Walkthrough</strong>
-      <span>Watch before taking the quiz</span>
-    </div>
+    <div class="video-header"><span>▶</span><strong>Module 05 — Certificate Configuration Walkthrough</strong><span>Watch before the quiz</span></div>
     <div class="video-frame">
       <iframe src="https://share.descript.com/embed/hRWhjRPgb2D" allowfullscreen allow="autoplay"></iframe>
     </div>
   </div>
 
-  <!-- OVERVIEW -->
-  <div class="overview-grid">
-    <div class="ov-card"><div class="ov-label">Feature</div><div class="ov-value">Auto Certificate</div></div>
-    <div class="ov-card"><div class="ov-label">Trigger</div><div class="ov-value">Event Completion</div></div>
-    <div class="ov-card"><div class="ov-label">Config Steps</div><div class="ov-value">3 Steps</div></div>
-    <div class="ov-card"><div class="ov-label">Delivery</div><div class="ov-value">By End of Day</div></div>
+  <div class="ov-grid">
+    <div class="ov-card"><div class="ov-lbl">Feature</div><div class="ov-val">Auto Certificate</div></div>
+    <div class="ov-card"><div class="ov-lbl">Trigger</div><div class="ov-val">Event Completion</div></div>
+    <div class="ov-card"><div class="ov-lbl">Config Steps</div><div class="ov-val">3 Steps</div></div>
+    <div class="ov-card"><div class="ov-lbl">Delivery</div><div class="ov-val">By End of Day</div></div>
   </div>
 
-  <!-- PREREQUISITE -->
-  <h3 style="font-size:15px; margin-bottom:10px;">Prerequisite</h3>
-  <div class="callout warn">
-    <span class="callout-icon">📌</span>
-    <div>
-      <strong>Before configuring any event for certificate generation:</strong>
-      <ul class="kt-list" style="margin-top:8px;">
-        <li>The certificate template must be configured in the <strong>Poster Generation service</strong> via the Admin Panel</li>
-        <li>Once configured, a <strong>Certificate Name Enum</strong> will be available — keep this handy</li>
-        <li>If the template is not set up in Poster Generation first, certificate configuration will not work</li>
+  <div class="callout warn"><span>📌</span><div><strong>Prerequisite:</strong> The certificate template must be configured in the <strong>Poster Generation service</strong> first. A <strong>Certificate Name Enum</strong> will then be available — keep it handy.</div></div>
+
+  <div class="step-card">
+    <div class="step-rail"><div class="step-num">01</div>
+    <div class="step-body">
+      <div class="step-title">Enable Certificate on the Event <span class="badge">EVENT SETUP</span></div>
+      <ul class="kl">
+        <li>While editing the event, locate the <strong>Is Certificate Enabled</strong> checkbox</li>
+        <li>Enable it to activate certificate generation — this is the master switch</li>
+        <li>If not enabled, no certificate will be generated regardless of other settings</li>
       </ul>
-    </div>
+    </div></div>
   </div>
 
-  <div class="divider"></div>
-
-  <!-- STEP 1 -->
   <div class="step-card">
-    <div class="step-rail">
-      <div class="step-number"><span class="step-num-txt">01</span></div>
-      <div class="step-body">
-        <div class="step-title">Enable Certificate on the Event <span class="step-badge">EVENT SETUP</span></div>
-        <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">When setting up or editing an event, locate the checkbox labelled <strong style="color:var(--text)">Is Certificate Enabled</strong>.</p>
-        <ul class="kt-list">
-          <li>Enable this checkbox to <strong>activate certificate generation</strong> for the event</li>
-          <li>If not enabled, no certificate will be generated regardless of any other configuration</li>
-        </ul>
-        <div class="callout danger">
-          <span class="callout-icon">✕</span>
-          <span>This checkbox is the master switch — if it's off, Steps 2 and 3 have no effect.</span>
-        </div>
-      </div>
-    </div>
+    <div class="step-rail"><div class="step-num">02</div>
+    <div class="step-body">
+      <div class="step-title">Set Completion Criteria <span class="badge">EVENT SETUP</span></div>
+      <table class="ft">
+        <thead><tr><th>Field</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><span class="fn">Resource ID</span></td><td>Content unit ID tied to the event. Leave blank for virtual meetups.</td></tr>
+          <tr><td><span class="fn">Minimum Threshold (%)</span></td><td>% of event completion required. E.g. 50% on a 2-hr event = attend 1 hr. Defaults to 1% if empty.</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn"><span>📌</span><span>Students who don't meet the threshold will not receive a certificate.</span></div>
+    </div></div>
   </div>
 
-  <!-- STEP 2 -->
   <div class="step-card">
-    <div class="step-rail">
-      <div class="step-number"><span class="step-num-txt">02</span></div>
-      <div class="step-body">
-        <div class="step-title">Set Event Certificate Completion Criteria <span class="step-badge">EVENT SETUP</span></div>
-        <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">This section defines what a student must meet to be eligible for the certificate. Configure two fields:</p>
-        <table class="field-table">
-          <thead><tr><th>Field</th><th>Description</th><th>Required</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><span class="field-name">Resource ID</span></td>
-              <td>The ID of the content unit tied to the event (e.g. a podcast unit ID). If it's a virtual meetup, leave blank.</td>
-              <td>Conditional</td>
-            </tr>
-            <tr>
-              <td><span class="field-name">Minimum Threshold (%)</span></td>
-              <td>The % of completion a student must reach. E.g. 50% on a 1-hour event = must attend 30 min. Defaults to 1% if left empty.</td>
-              <td><span class="req">Required</span></td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="callout warn">
-          <span class="callout-icon">📌</span>
-          <span>If the student does not meet the minimum threshold, the certificate will not be generated for them.</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP 3 -->
-  <div class="step-card">
-    <div class="step-rail">
-      <div class="step-number"><span class="step-num-txt">03</span></div>
-      <div class="step-body">
-        <div class="step-title">Configure Certificate Template Data <span class="step-badge">ADMIN PANEL</span></div>
-        <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">This step links the certificate template to the event via the <strong style="color:var(--text)">Certificate Template Data</strong> section in the Admin Panel.</p>
-        <ul class="kt-list">
-          <li>Copy the <strong>Event ID</strong> from the event you created</li>
-          <li>Go to <strong>Certificate Template Data</strong> in the Admin Panel</li>
-          <li>Fill in the following three fields:</li>
-        </ul>
-        <table class="field-table" style="margin-top:10px;">
-          <thead><tr><th>Field</th><th>What to Enter</th></tr></thead>
-          <tbody>
-            <tr><td><span class="field-name">Certificate Resource ID</span></td><td>Paste the Event ID copied from Step 1</td></tr>
-            <tr><td><span class="field-name">Template Data</span></td><td>JSON with certificate_template_type and certificate_name_enum (see below)</td></tr>
-            <tr><td><span class="field-name">Enrollment Plans</span></td><td>Enter the relevant plan. For NIAT events, set to <code>NIAT</code></td></tr>
-          </tbody>
-        </table>
-        <p style="font-size:13px; color:var(--muted); margin:12px 0 6px;"><strong style="color:var(--text)">Template Data JSON format:</strong></p>
-        <pre>{
+    <div class="step-rail"><div class="step-num">03</div>
+    <div class="step-body">
+      <div class="step-title">Configure Certificate Template Data <span class="badge">ADMIN PANEL</span></div>
+      <ul class="kl">
+        <li>Copy the <strong>Event ID</strong> from the event you created</li>
+        <li>Go to <strong>Certificate Template Data</strong> in the Admin Panel</li>
+        <li>Fill in: <strong>Certificate Resource ID</strong> (paste Event ID), <strong>Template Data</strong> (JSON below), <strong>Enrollment Plans</strong> (<code>NIAT</code>)</li>
+      </ul>
+      <pre>{
   "certificate_template_type": "DEFAULT",
   "certificate_name_enum": "NIAT_MURFAI_CERTIFICATE"
 }</pre>
-        <div class="callout danger">
-          <span class="callout-icon">📌</span>
-          <span>Always ensure the Certificate Name Enum exactly matches what was configured in the Poster Generation service. Any mismatch will result in no certificate being generated.</span>
-        </div>
-      </div>
-    </div>
+      <div class="callout danger"><span>📌</span><span>The Certificate Name Enum must exactly match what was configured in Poster Generation. Any mismatch = no certificate generated.</span></div>
+    </div></div>
   </div>
 
-  <div class="divider"></div>
-
-  <!-- STUDENT EXPERIENCE -->
-  <h3 style="font-size:16px; margin-bottom:16px;">Student Experience</h3>
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px;">
-    <div class="ov-card">
-      <div class="ov-label" style="color:var(--accent-2);">During the Event</div>
-      <ul class="kt-list" style="margin-top:8px;">
-        <li>Student can see the event is live and join it</li>
-        <li>If an Event Pass is configured, they also see their pass</li>
-      </ul>
-    </div>
-    <div class="ov-card">
-      <div class="ov-label" style="color:var(--success);">After the Event</div>
-      <ul class="kt-list" style="margin-top:8px;">
-        <li>Eligible students see: <em>"You've earned it! Your certificate will be available here soon."</em></li>
-        <li>Certificate appears on the same screen by end of day</li>
-        <li>Students can share directly to LinkedIn and Twitter</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- QUICK REF -->
-  <h3 style="font-size:15px; margin-bottom:12px;">Quick Reference Summary</h3>
-  <table class="ref-table">
-    <thead><tr><th>Configuration</th><th>Field / Setting</th><th>Where to Configure</th></tr></thead>
-    <tbody>
-      <tr><td>Is Certificate Enabled</td><td>Checkbox — turn on</td><td>Event Setup</td></tr>
-      <tr><td>Completion Criteria</td><td>Resource ID + Threshold %</td><td>Event Setup</td></tr>
-      <tr><td>Certificate Template Data</td><td>Resource ID, Template Data, Enrollment Plan</td><td>Admin Panel — Certificate Template Data</td></tr>
-    </tbody>
-  </table>
-
-  <!-- QUIZ 2 -->
-  <div class="quiz-section" id="quiz-2" style="margin-top:40px;">
+  <div class="quiz-section">
     <div class="quiz-header">
       <div class="quiz-icon">📝</div>
-      <div class="quiz-header-text">
-        <h3>Module 02 Quiz — Event Certificates</h3>
-        <p>5 questions · Enter your name and Gmail, then answer all questions</p>
-      </div>
+      <div><h3>Module 05 Quiz — Event Certificates</h3><p>Minimum 3/5 to unlock Module 06</p></div>
     </div>
     <div class="quiz-body">
-      <div class="quiz-intro">Make sure you have watched the video and read the guide above before attempting the quiz.</div>
-
-      <div class="quiz-user-fields">
-        <div class="q-field"><label>Full Name <span class="req">*</span></label><input type="text" id="q2-name" placeholder="Your full name"></div>
-        <div class="q-field"><label>Gmail Address <span class="req">*</span></label><input type="email" id="q2-email" placeholder="yourname@gmail.com"></div>
+      <div class="quiz-intro">Complete this quiz to unlock the final module. You need at least 3 out of 5 correct.</div>
+      <div class="quiz-fields">
+        <div class="qf"><label>Full Name <span class="req">*</span></label><input type="text" id="n5" placeholder="Your full name"></div>
+        <div class="qf"><label>Gmail <span class="req">*</span></label><input type="email" id="e5" placeholder="yourname@gmail.com"></div>
       </div>
 
       <div class="q-block">
-        <div class="q-num">QUESTION 01 / 05</div>
+        <div class="q-num">Q1 / 5</div>
         <div class="q-text">What must be done BEFORE configuring certificate generation on an event?</div>
-        <div class="q-options" id="q2-q1">
-          <div class="q-opt" onclick="selectOpt(this,'q2-q1','a')"><input type="radio" name="q2q1" value="a"><div class="opt-bullet"></div>The event must have at least 50 registrations</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q1','b')"><input type="radio" name="q2q1" value="b"><div class="opt-bullet"></div>The certificate template must be configured in the Poster Generation service</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q1','c')"><input type="radio" name="q2q1" value="c"><div class="opt-bullet"></div>The event must have already ended</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q1','d')"><input type="radio" name="q2q1" value="d"><div class="opt-bullet"></div>The event pass must be configured first</div>
+        <div class="q-opts" id="m5q1">
+          <div class="q-opt" onclick="pick(this,'m5q1','a')" data-val="a"><div class="bullet"></div>The event must have at least 50 registrations</div>
+          <div class="q-opt" onclick="pick(this,'m5q1','b')" data-val="b"><div class="bullet"></div>The certificate template must be configured in the Poster Generation service</div>
+          <div class="q-opt" onclick="pick(this,'m5q1','c')" data-val="c"><div class="bullet"></div>The event must have already ended</div>
+          <div class="q-opt" onclick="pick(this,'m5q1','d')" data-val="d"><div class="bullet"></div>The event pass must be configured first</div>
         </div>
       </div>
 
       <div class="q-block">
-        <div class="q-num">QUESTION 02 / 05</div>
-        <div class="q-text">Which checkbox must be enabled to activate certificate generation for an event?</div>
-        <div class="q-options" id="q2-q2">
-          <div class="q-opt" onclick="selectOpt(this,'q2-q2','a')"><input type="radio" name="q2q2" value="a"><div class="opt-bullet"></div>Is Event Active</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q2','b')"><input type="radio" name="q2q2" value="b"><div class="opt-bullet"></div>Is Pass Enabled</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q2','c')"><input type="radio" name="q2q2" value="c"><div class="opt-bullet"></div>Is Certificate Enabled</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q2','d')"><input type="radio" name="q2q2" value="d"><div class="opt-bullet"></div>Enable Auto Certificate</div>
+        <div class="q-num">Q2 / 5</div>
+        <div class="q-text">Which checkbox is the master switch for certificate generation?</div>
+        <div class="q-opts" id="m5q2">
+          <div class="q-opt" onclick="pick(this,'m5q2','a')" data-val="a"><div class="bullet"></div>Is Event Active</div>
+          <div class="q-opt" onclick="pick(this,'m5q2','b')" data-val="b"><div class="bullet"></div>Is Pass Enabled</div>
+          <div class="q-opt" onclick="pick(this,'m5q2','c')" data-val="c"><div class="bullet"></div>Is Certificate Enabled</div>
+          <div class="q-opt" onclick="pick(this,'m5q2','d')" data-val="d"><div class="bullet"></div>Enable Auto Certificate</div>
         </div>
       </div>
 
       <div class="q-block">
-        <div class="q-num">QUESTION 03 / 05</div>
-        <div class="q-text">If the Minimum Threshold is set to 50% for a 2-hour virtual meetup, how long must a student attend to be eligible?</div>
-        <div class="q-options" id="q2-q3">
-          <div class="q-opt" onclick="selectOpt(this,'q2-q3','a')"><input type="radio" name="q2q3" value="a"><div class="opt-bullet"></div>30 minutes</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q3','b')"><input type="radio" name="q2q3" value="b"><div class="opt-bullet"></div>45 minutes</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q3','c')"><input type="radio" name="q2q3" value="c"><div class="opt-bullet"></div>1 hour</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q3','d')"><input type="radio" name="q2q3" value="d"><div class="opt-bullet"></div>2 hours</div>
+        <div class="q-num">Q3 / 5</div>
+        <div class="q-text">If the Minimum Threshold is set to 50% for a 2-hour event, how long must a student attend?</div>
+        <div class="q-opts" id="m5q3">
+          <div class="q-opt" onclick="pick(this,'m5q3','a')" data-val="a"><div class="bullet"></div>30 minutes</div>
+          <div class="q-opt" onclick="pick(this,'m5q3','b')" data-val="b"><div class="bullet"></div>45 minutes</div>
+          <div class="q-opt" onclick="pick(this,'m5q3','c')" data-val="c"><div class="bullet"></div>1 hour</div>
+          <div class="q-opt" onclick="pick(this,'m5q3','d')" data-val="d"><div class="bullet"></div>2 hours</div>
         </div>
       </div>
 
       <div class="q-block">
-        <div class="q-num">QUESTION 04 / 05</div>
+        <div class="q-num">Q4 / 5</div>
         <div class="q-text">What should be pasted into the Certificate Resource ID field in Step 3?</div>
-        <div class="q-options" id="q2-q4">
-          <div class="q-opt" onclick="selectOpt(this,'q2-q4','a')"><input type="radio" name="q2q4" value="a"><div class="opt-bullet"></div>The student's NW ID</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q4','b')"><input type="radio" name="q2q4" value="b"><div class="opt-bullet"></div>The Poster Name Enum value</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q4','c')"><input type="radio" name="q2q4" value="c"><div class="opt-bullet"></div>The Event ID copied from the event you created</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q4','d')"><input type="radio" name="q2q4" value="d"><div class="opt-bullet"></div>The Certificate Name Enum string</div>
+        <div class="q-opts" id="m5q4">
+          <div class="q-opt" onclick="pick(this,'m5q4','a')" data-val="a"><div class="bullet"></div>The student's NW ID</div>
+          <div class="q-opt" onclick="pick(this,'m5q4','b')" data-val="b"><div class="bullet"></div>The Poster Name Enum value</div>
+          <div class="q-opt" onclick="pick(this,'m5q4','c')" data-val="c"><div class="bullet"></div>The Event ID copied from the event you created</div>
+          <div class="q-opt" onclick="pick(this,'m5q4','d')" data-val="d"><div class="bullet"></div>The Certificate Name Enum string</div>
         </div>
       </div>
 
       <div class="q-block">
-        <div class="q-num">QUESTION 05 / 05</div>
-        <div class="q-text">How can students share their certificate after receiving it?</div>
-        <div class="q-options" id="q2-q5">
-          <div class="q-opt" onclick="selectOpt(this,'q2-q5','a')"><input type="radio" name="q2q5" value="a"><div class="opt-bullet"></div>Only via email to themselves</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q5','b')"><input type="radio" name="q2q5" value="b"><div class="opt-bullet"></div>Only by downloading as PDF</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q5','c')"><input type="radio" name="q2q5" value="c"><div class="opt-bullet"></div>Directly to LinkedIn and Twitter from the certificate view screen</div>
-          <div class="q-opt" onclick="selectOpt(this,'q2-q5','d')"><input type="radio" name="q2q5" value="d"><div class="opt-bullet"></div>They cannot share it externally</div>
+        <div class="q-num">Q5 / 5</div>
+        <div class="q-text">What is the default Minimum Threshold if the field is left empty?</div>
+        <div class="q-opts" id="m5q5">
+          <div class="q-opt" onclick="pick(this,'m5q5','a')" data-val="a"><div class="bullet"></div>50%</div>
+          <div class="q-opt" onclick="pick(this,'m5q5','b')" data-val="b"><div class="bullet"></div>0% (everyone gets a certificate)</div>
+          <div class="q-opt" onclick="pick(this,'m5q5','c')" data-val="c"><div class="bullet"></div>1%</div>
+          <div class="q-opt" onclick="pick(this,'m5q5','d')" data-val="d"><div class="bullet"></div>100%</div>
         </div>
       </div>
 
-      <button class="quiz-submit-btn" onclick="submitQuiz(2)" id="btn-2">Submit Quiz</button>
+      <button class="submit-btn" onclick="submitQuiz(5)" id="sbtn-5">Submit Quiz</button>
     </div>
-    <div class="quiz-result" id="result-2"></div>
+    <div class="quiz-result" id="qres-5">
+      <button class="next-btn" id="next-5" onclick="goModule(6)">Continue to Module 06 — Event Pass →</button>
+    </div>
   </div>
+</div></div>
 
-</div></div><!-- /module-2 -->
 
-
-<!-- ═══════════════════════════ MODULE 3 ═══════════════════════════ -->
-<div class="module" id="module-3">
+<!-- ══════════════ MODULE 6 — EVENT PASS ══════════════ -->
+<div class="module" id="module-6">
 <div class="wrap">
-
   <div class="sec-head">
-    <div class="sec-label">Module 03</div>
+    <div class="sec-label">Module 06 of 06</div>
     <div class="sec-title">Event Pass Generation</div>
-    <div class="sec-sub">Configuring personalized event passes that students receive automatically upon registration</div>
+    <div class="sec-sub">Configuring personalized event passes students receive automatically upon registration</div>
   </div>
 
-  <!-- VIDEO -->
   <div class="video-box">
-    <div class="video-header">
-      <span class="icon">▶</span>
-      <strong>Module 03 — Event Pass Configuration Walkthrough</strong>
-      <span>Watch before taking the quiz</span>
-    </div>
+    <div class="video-header"><span>▶</span><strong>Module 06 — Event Pass Walkthrough</strong><span>Watch before the quiz</span></div>
     <div class="video-frame">
       <iframe src="https://share.descript.com/embed/6ygSMKvgl0X" allowfullscreen allow="autoplay"></iframe>
     </div>
   </div>
 
-  <!-- OVERVIEW -->
-  <div class="overview-grid">
-    <div class="ov-card"><div class="ov-label">Feature</div><div class="ov-value">Auto Event Pass</div></div>
-    <div class="ov-card"><div class="ov-label">Trigger</div><div class="ov-value">Registration</div></div>
-    <div class="ov-card"><div class="ov-label">Config Steps</div><div class="ov-value">3 Steps</div></div>
-    <div class="ov-card"><div class="ov-label">Section</div><div class="ov-value">Event Pass Config</div></div>
+  <div class="ov-grid">
+    <div class="ov-card"><div class="ov-lbl">Feature</div><div class="ov-val">Auto Event Pass</div></div>
+    <div class="ov-card"><div class="ov-lbl">Trigger</div><div class="ov-val">Registration</div></div>
+    <div class="ov-card"><div class="ov-lbl">Config Steps</div><div class="ov-val">3 Steps</div></div>
+    <div class="ov-card"><div class="ov-lbl">Section</div><div class="ov-val">Event Pass Config</div></div>
   </div>
 
-  <!-- PREREQUISITE -->
-  <h3 style="font-size:15px; margin-bottom:10px;">Prerequisite</h3>
-  <div class="callout warn">
-    <span class="callout-icon">📌</span>
-    <div>
-      <strong>Before configuring the event pass:</strong>
-      <ul class="kt-list" style="margin-top:8px;">
-        <li>The pass template must be configured in the <strong>Poster Generation service</strong> via the Admin Panel</li>
-        <li>Once configured, a <strong>Poster Name Enum</strong> will be available — keep this handy</li>
-        <li>If the pass template is not set up in Poster Generation first, the event pass configuration will not work</li>
+  <div class="callout warn"><span>📌</span><div><strong>Prerequisite:</strong> The pass template must be configured in the <strong>Poster Generation service</strong> first. A <strong>Poster Name Enum</strong> will then be available.</div></div>
+
+  <div class="step-card">
+    <div class="step-rail"><div class="step-num">01</div>
+    <div class="step-body">
+      <div class="step-title">Enter the Poster Name Enum <span class="badge">EVENT PASS CONFIG</span></div>
+      <ul class="kl">
+        <li>Locate the <strong>Event Pass Config</strong> section in the event edit page</li>
+        <li>In <strong>Poster Name Enum</strong>, enter the exact enum value from the Poster Generation service</li>
+        <li>Any typo or mismatch will cause the pass to not generate</li>
       </ul>
-    </div>
+    </div></div>
   </div>
 
-  <div class="divider"></div>
-
-  <!-- STEP 1 -->
   <div class="step-card">
-    <div class="step-rail">
-      <div class="step-number"><span class="step-num-txt">01</span></div>
-      <div class="step-body">
-        <div class="step-title">Enter the Poster Name Enum <span class="step-badge">EVENT PASS CONFIG</span></div>
-        <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">Locate the <strong style="color:var(--text)">Event Pass Config</strong> section while setting up or editing an event.</p>
-        <ul class="kt-list">
-          <li>In the <strong>Poster Name Enum</strong> field, enter the <strong>exact enum value</strong> of the pass template configured in the Poster Generation service</li>
-          <li>This is how the system knows which pass template to use for this event</li>
-        </ul>
-        <div class="callout danger">
-          <span class="callout-icon">✕</span>
-          <span>The value must be exact — any typo or mismatch will cause the pass to not generate.</span>
-        </div>
-      </div>
-    </div>
+    <div class="step-rail"><div class="step-num">02</div>
+    <div class="step-body">
+      <div class="step-title">Select Overlay Options <span class="badge">MUST MATCH TEMPLATE</span></div>
+      <table class="ft">
+        <thead><tr><th>Option</th><th>What It Overlays</th></tr></thead>
+        <tbody>
+          <tr><td><span class="fn">Overlay Name</span></td><td>Student's name</td></tr>
+          <tr><td><span class="fn">Overlay Profile Pic</span></td><td>Student's profile picture</td></tr>
+          <tr><td><span class="fn">Overlay Event Start Date</span></td><td>Event start date</td></tr>
+          <tr><td><span class="fn">Overlay Event End Date</span></td><td>Event end date</td></tr>
+          <tr><td><span class="fn">Overlay Issued Date</span></td><td>Date the pass was issued</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn"><span>📌</span><span>These must exactly match what was configured in the pass template. Mismatch = pass won't render correctly.</span></div>
+    </div></div>
   </div>
 
-  <!-- STEP 2 -->
   <div class="step-card">
-    <div class="step-rail">
-      <div class="step-number"><span class="step-num-txt">02</span></div>
-      <div class="step-body">
-        <div class="step-title">Select Overlay Options <span class="step-badge">EVENT PASS CONFIG</span></div>
-        <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">Choose which student data gets overlaid onto the pass. The following checkboxes are available:</p>
-        <table class="field-table">
-          <thead><tr><th>Overlay Option</th><th>What It Does</th></tr></thead>
-          <tbody>
-            <tr><td><span class="field-name">Overlay Name</span></td><td>Overlays the student's name on the pass (field: <code>name</code>)</td></tr>
-            <tr><td><span class="field-name">Overlay Profile Pic</span></td><td>Overlays the student's profile picture (field: <code>profile_pic_url</code>)</td></tr>
-            <tr><td><span class="field-name">Overlay Event Start Date</span></td><td>Overlays the event start date (field: <code>event_start_date</code>)</td></tr>
-            <tr><td><span class="field-name">Overlay Event End Date</span></td><td>Overlays the event end date (field: <code>event_end_date</code>)</td></tr>
-            <tr><td><span class="field-name">Overlay Issued Date</span></td><td>Overlays the date the pass was issued (field: <code>issued_date</code>)</td></tr>
-          </tbody>
-        </table>
-        <div class="callout warn">
-          <span class="callout-icon">📌</span>
-          <span>The checkboxes selected here must <strong>exactly match</strong> what was configured in the pass template in the Poster Generation service. Any mismatch will result in the pass not rendering correctly.</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- STEP 3 -->
-  <div class="step-card">
-    <div class="step-rail">
-      <div class="step-number"><span class="step-num-txt">03</span></div>
-      <div class="step-body">
-        <div class="step-title">Set Fallback Avatar URL <span class="step-badge">CONDITIONAL</span></div>
-        <p style="font-size:14px; color:var(--muted); margin-bottom:12px;">The <strong style="color:var(--text)">Fallback Avatar URL</strong> field applies when Overlay Profile Pic is enabled.</p>
-        <ul class="kt-list">
-          <li>If a student has <strong>not uploaded a profile photo</strong>, the image from this URL appears on their pass instead</li>
-          <li>This field is only relevant when <strong>Overlay Profile Pic</strong> is selected</li>
-          <li>Make sure a <strong>valid default avatar image URL</strong> is provided</li>
-        </ul>
-        <div class="callout info">
-          <span class="callout-icon">ℹ</span>
-          <span>If Overlay Profile Pic is not selected, this field can be left blank.</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- STUDENT EXPERIENCE -->
-  <h3 style="font-size:16px; margin-bottom:16px;">Student Experience</h3>
-  <div class="callout ok">
-    <span class="callout-icon">✓</span>
-    <div>Once the event pass is correctly configured and the event goes live:
-      <ul class="kt-list" style="margin-top:8px;">
-        <li>Students can see the event is live and join it</li>
-        <li>Alongside the event, students will also see their <strong>event pass</strong> with a "View Pass" button</li>
+    <div class="step-rail"><div class="step-num">03</div>
+    <div class="step-body">
+      <div class="step-title">Set Fallback Avatar URL <span class="badge">CONDITIONAL</span></div>
+      <ul class="kl">
+        <li>Only relevant when <strong>Overlay Profile Pic</strong> is selected</li>
+        <li>If a student has no profile photo, this image URL is used instead</li>
+        <li>Provide a valid default avatar image URL</li>
       </ul>
-    </div>
+    </div></div>
   </div>
 
-  <div class="divider"></div>
-
-  <!-- QUICK REF -->
-  <h3 style="font-size:15px; margin-bottom:12px;">Quick Reference Summary</h3>
-  <table class="ref-table">
-    <thead><tr><th>Field</th><th>What to Enter</th><th>Notes</th></tr></thead>
-    <tbody>
-      <tr><td>Poster Name Enum</td><td>Enum value from Poster Generation service</td><td>Must be exact</td></tr>
-      <tr><td>Overlay Options</td><td>Tick fields that match the poster template</td><td>Mismatch = pass won't render</td></tr>
-      <tr><td>Fallback Avatar URL</td><td>URL of a default avatar image</td><td>Only needed if Overlay Profile Pic is enabled</td></tr>
-    </tbody>
-  </table>
-
-  <!-- QUIZ 3 -->
-  <div class="quiz-section" id="quiz-3" style="margin-top:40px;">
+  <div class="quiz-section">
     <div class="quiz-header">
-      <div class="quiz-icon">📝</div>
-      <div class="quiz-header-text">
-        <h3>Module 03 Quiz — Event Pass Generation</h3>
-        <p>5 questions · Enter your name and Gmail, then answer all questions</p>
-      </div>
+      <div class="quiz-icon">🏆</div>
+      <div><h3>Module 06 Quiz — Event Pass</h3><p>Final quiz — minimum 3/5 to complete the training</p></div>
     </div>
     <div class="quiz-body">
-      <div class="quiz-intro">Make sure you have watched the video and read the guide above before attempting the quiz.</div>
-
-      <div class="quiz-user-fields">
-        <div class="q-field"><label>Full Name <span class="req">*</span></label><input type="text" id="q3-name" placeholder="Your full name"></div>
-        <div class="q-field"><label>Gmail Address <span class="req">*</span></label><input type="email" id="q3-email" placeholder="yourname@gmail.com"></div>
+      <div class="quiz-intro">This is the final quiz. Score 3/5 or above to complete the full training.</div>
+      <div class="quiz-fields">
+        <div class="qf"><label>Full Name <span class="req">*</span></label><input type="text" id="n6" placeholder="Your full name"></div>
+        <div class="qf"><label>Gmail <span class="req">*</span></label><input type="email" id="e6" placeholder="yourname@gmail.com"></div>
       </div>
 
       <div class="q-block">
-        <div class="q-num">QUESTION 01 / 05</div>
+        <div class="q-num">Q1 / 5</div>
         <div class="q-text">Where in the Admin Panel do you configure the Event Pass?</div>
-        <div class="q-options" id="q3-q1">
-          <div class="q-opt" onclick="selectOpt(this,'q3-q1','a')"><input type="radio" name="q3q1" value="a"><div class="opt-bullet"></div>Certificate Template Data section</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q1','b')"><input type="radio" name="q3q1" value="b"><div class="opt-bullet"></div>Event Pass Config section within the event setup</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q1','c')"><input type="radio" name="q3q1" value="c"><div class="opt-bullet"></div>NKB Events → Pass Generator (separate menu)</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q1','d')"><input type="radio" name="q3q1" value="d"><div class="opt-bullet"></div>Django Admin → Poster Service → New Pass</div>
+        <div class="q-opts" id="m6q1">
+          <div class="q-opt" onclick="pick(this,'m6q1','a')" data-val="a"><div class="bullet"></div>Certificate Template Data section</div>
+          <div class="q-opt" onclick="pick(this,'m6q1','b')" data-val="b"><div class="bullet"></div>Event Pass Config section within the event setup</div>
+          <div class="q-opt" onclick="pick(this,'m6q1','c')" data-val="c"><div class="bullet"></div>NKB Events → Pass Generator (separate menu)</div>
+          <div class="q-opt" onclick="pick(this,'m6q1','d')" data-val="d"><div class="bullet"></div>Django Admin → Poster Service → New Pass</div>
         </div>
       </div>
 
       <div class="q-block">
-        <div class="q-num">QUESTION 02 / 05</div>
+        <div class="q-num">Q2 / 5</div>
         <div class="q-text">What value must you enter in the Poster Name Enum field?</div>
-        <div class="q-options" id="q3-q2">
-          <div class="q-opt" onclick="selectOpt(this,'q3-q2','a')"><input type="radio" name="q3q2" value="a"><div class="opt-bullet"></div>The event's full display title</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q2','b')"><input type="radio" name="q3q2" value="b"><div class="opt-bullet"></div>Any descriptive name you choose</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q2','c')"><input type="radio" name="q3q2" value="c"><div class="opt-bullet"></div>The exact enum value from the Poster Generation service</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q2','d')"><input type="radio" name="q3q2" value="d"><div class="opt-bullet"></div>The student's enrollment plan name</div>
+        <div class="q-opts" id="m6q2">
+          <div class="q-opt" onclick="pick(this,'m6q2','a')" data-val="a"><div class="bullet"></div>The event's full display title</div>
+          <div class="q-opt" onclick="pick(this,'m6q2','b')" data-val="b"><div class="bullet"></div>Any descriptive name you choose</div>
+          <div class="q-opt" onclick="pick(this,'m6q2','c')" data-val="c"><div class="bullet"></div>The exact enum value from the Poster Generation service</div>
+          <div class="q-opt" onclick="pick(this,'m6q2','d')" data-val="d"><div class="bullet"></div>The student's enrollment plan name</div>
         </div>
       </div>
 
       <div class="q-block">
-        <div class="q-num">QUESTION 03 / 05</div>
-        <div class="q-text">What happens if the Overlay Options selected don't match the poster template configuration?</div>
-        <div class="q-options" id="q3-q3">
-          <div class="q-opt" onclick="selectOpt(this,'q3-q3','a')"><input type="radio" name="q3q3" value="a"><div class="opt-bullet"></div>The event gets cancelled automatically</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q3','b')"><input type="radio" name="q3q3" value="b"><div class="opt-bullet"></div>An admin receives an alert email</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q3','c')"><input type="radio" name="q3q3" value="c"><div class="opt-bullet"></div>The pass will not render correctly for the student</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q3','d')"><input type="radio" name="q3q3" value="d"><div class="opt-bullet"></div>The student's registration is rejected</div>
+        <div class="q-num">Q3 / 5</div>
+        <div class="q-text">What happens if the Overlay Options don't match the poster template?</div>
+        <div class="q-opts" id="m6q3">
+          <div class="q-opt" onclick="pick(this,'m6q3','a')" data-val="a"><div class="bullet"></div>The event gets cancelled automatically</div>
+          <div class="q-opt" onclick="pick(this,'m6q3','b')" data-val="b"><div class="bullet"></div>An admin receives an alert email</div>
+          <div class="q-opt" onclick="pick(this,'m6q3','c')" data-val="c"><div class="bullet"></div>The pass will not render correctly for the student</div>
+          <div class="q-opt" onclick="pick(this,'m6q3','d')" data-val="d"><div class="bullet"></div>The student's registration is rejected</div>
         </div>
       </div>
 
       <div class="q-block">
-        <div class="q-num">QUESTION 04 / 05</div>
+        <div class="q-num">Q4 / 5</div>
         <div class="q-text">When is the Fallback Avatar URL field relevant?</div>
-        <div class="q-options" id="q3-q4">
-          <div class="q-opt" onclick="selectOpt(this,'q3-q4','a')"><input type="radio" name="q3q4" value="a"><div class="opt-bullet"></div>When Overlay Name is selected</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q4','b')"><input type="radio" name="q3q4" value="b"><div class="opt-bullet"></div>When a student has no profile photo and Overlay Profile Pic is enabled</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q4','c')"><input type="radio" name="q3q4" value="c"><div class="opt-bullet"></div>It is always required regardless of overlay settings</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q4','d')"><input type="radio" name="q3q4" value="d"><div class="opt-bullet"></div>When Overlay Issued Date is selected</div>
+        <div class="q-opts" id="m6q4">
+          <div class="q-opt" onclick="pick(this,'m6q4','a')" data-val="a"><div class="bullet"></div>When Overlay Name is selected</div>
+          <div class="q-opt" onclick="pick(this,'m6q4','b')" data-val="b"><div class="bullet"></div>When a student has no profile photo and Overlay Profile Pic is enabled</div>
+          <div class="q-opt" onclick="pick(this,'m6q4','c')" data-val="c"><div class="bullet"></div>It is always required</div>
+          <div class="q-opt" onclick="pick(this,'m6q4','d')" data-val="d"><div class="bullet"></div>When Overlay Issued Date is selected</div>
         </div>
       </div>
 
       <div class="q-block">
-        <div class="q-num">QUESTION 05 / 05</div>
+        <div class="q-num">Q5 / 5</div>
         <div class="q-text">When does a registered student see their event pass?</div>
-        <div class="q-options" id="q3-q5">
-          <div class="q-opt" onclick="selectOpt(this,'q3-q5','a')"><input type="radio" name="q3q5" value="a"><div class="opt-bullet"></div>24 hours after registration</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q5','b')"><input type="radio" name="q3q5" value="b"><div class="opt-bullet"></div>Only after the event ends</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q5','c')"><input type="radio" name="q3q5" value="c"><div class="opt-bullet"></div>Alongside the event once it goes live</div>
-          <div class="q-opt" onclick="selectOpt(this,'q3-q5','d')"><input type="radio" name="q3q5" value="d"><div class="opt-bullet"></div>Only after completing the quiz</div>
+        <div class="q-opts" id="m6q5">
+          <div class="q-opt" onclick="pick(this,'m6q5','a')" data-val="a"><div class="bullet"></div>24 hours after registration</div>
+          <div class="q-opt" onclick="pick(this,'m6q5','b')" data-val="b"><div class="bullet"></div>Only after the event ends</div>
+          <div class="q-opt" onclick="pick(this,'m6q5','c')" data-val="c"><div class="bullet"></div>Alongside the event once it goes live</div>
+          <div class="q-opt" onclick="pick(this,'m6q5','d')" data-val="d"><div class="bullet"></div>Only after completing the quiz</div>
         </div>
       </div>
 
-      <button class="quiz-submit-btn" onclick="submitQuiz(3)" id="btn-3">Submit Quiz</button>
+      <button class="submit-btn" onclick="submitQuiz(6)" id="sbtn-6">Submit Quiz</button>
     </div>
-    <div class="quiz-result" id="result-3"></div>
+    <div class="quiz-result" id="qres-6"></div>
   </div>
+</div></div>
 
-</div></div><!-- /module-3 -->
 
 <script>
 // ── CORRECT ANSWERS ──
-const ANSWERS = {
-  1: { q1:'b', q2:'c', q3:'b', q4:'b', q5:'c' },
-  2: { q1:'b', q2:'c', q3:'c', q4:'c', q5:'c' },
-  3: { q1:'b', q2:'c', q3:'c', q4:'b', q5:'c' }
+const ANS = {
+  1: { m1q1:'b', m1q2:'c', m1q3:'c', m1q4:'b', m1q5:'c' },
+  2: { m2q1:'b', m2q2:'b', m2q3:'b', m2q4:'b', m2q5:'b' },
+  3: { m3q1:'b', m3q2:'b', m3q3:'b', m3q4:'b', m3q5:'b' },
+  4: { m4q1:'a', m4q2:'c', m4q3:'b', m4q4:'b', m4q5:'b' },
+  5: { m5q1:'b', m5q2:'c', m5q3:'c', m5q4:'c', m5q5:'c' },
+  6: { m6q1:'b', m6q2:'c', m6q3:'c', m6q4:'b', m6q5:'c' }
 };
 
-// Replace this with your Google Apps Script Web App URL after deployment
+const PASS_THRESHOLD = 3;
+const TOTAL_MODULES  = 6;
 const APPS_SCRIPT_URL = 'PASTE_YOUR_APPS_SCRIPT_URL_HERE';
 
+// Load progress from localStorage
+let passed = JSON.parse(localStorage.getItem('kt_passed') || '[]');
+
+// ── INIT ──
+function init() {
+  passed.forEach(m => unlockTab(m));
+  updateProgress();
+}
+
 // ── TAB SWITCHING ──
-function showModule(n) {
-  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-  document.getElementById('module-' + n).classList.add('active');
-  document.querySelector('[data-m="' + n + '"]').classList.add('active');
+function goModule(m) {
+  const btn = document.querySelector('[data-m="' + m + '"]');
+  if (btn.classList.contains('locked')) {
+    const prev = m - 1;
+    alert('🔒 Module ' + String(m).padStart(2,'0') + ' is locked.\nComplete Module ' + String(prev).padStart(2,'0') + ' quiz with at least 3/5 to unlock it.');
+    return;
+  }
+  document.querySelectorAll('.module').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('module-' + m).classList.add('active');
+  btn.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── OPTION SELECTION ──
-function selectOpt(el, groupId, val) {
+function pick(el, groupId, val) {
   document.querySelectorAll('#' + groupId + ' .q-opt').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
-  el.dataset.val = val;
 }
 
-// ── QUIZ SUBMISSION ──
+// ── QUIZ SUBMIT ──
 function submitQuiz(m) {
-  const name  = document.getElementById('q' + m + '-name').value.trim();
-  const email = document.getElementById('q' + m + '-email').value.trim();
+  const name  = document.getElementById('n' + m).value.trim();
+  const email = document.getElementById('e' + m).value.trim();
+  if (!name || !email) { alert('Please enter your name and Gmail.'); return; }
+  if (!email.includes('@')) { alert('Please enter a valid email address.'); return; }
 
-  if (!name || !email) { alert('Please enter your name and Gmail before submitting.'); return; }
-  if (!email.includes('@')) { alert('Please enter a valid Gmail address.'); return; }
-
-  const correct = ANSWERS[m];
-  const qs = ['q1','q2','q3','q4','q5'];
-  let score = 0;
+  const correct = ANS[m];
+  const qKeys   = Object.keys(correct);
   let allAnswered = true;
 
-  qs.forEach(q => {
-    const group = document.getElementById('q' + m + '-' + q);
-    const selected = group ? group.querySelector('.selected') : null;
-    if (!selected) { allAnswered = false; }
+  qKeys.forEach(qk => {
+    const sel = document.querySelector('#' + qk + ' .selected');
+    if (!sel) allAnswered = false;
   });
-
   if (!allAnswered) { alert('Please answer all 5 questions before submitting.'); return; }
 
-  // Score and highlight
-  qs.forEach(q => {
-    const group = document.getElementById('q' + m + '-' + q);
-    const opts = group.querySelectorAll('.q-opt');
-    const selected = group.querySelector('.selected');
-    const userVal = selected ? selected.dataset.val : null;
-    const rightVal = correct[q];
+  // Score
+  let score = 0;
+  qKeys.forEach(qk => {
+    const group   = document.getElementById(qk);
+    const opts    = group.querySelectorAll('.q-opt');
+    const selOpt  = group.querySelector('.selected');
+    const userVal = selOpt ? selOpt.dataset.val : null;
+    const rightVal= correct[qk];
 
     opts.forEach(o => {
-      o.style.pointerEvents = 'none';
-      if (o.dataset.val === rightVal) o.classList.add('correct');
-      if (o === selected && userVal !== rightVal) o.classList.add('wrong');
+      o.classList.add('locked-opt');
+      o.onclick = null;
+      if (o.dataset.val === rightVal) { o.classList.add('correct'); o.querySelector('.bullet').textContent = '✓'; }
+      if (o === selOpt && userVal !== rightVal) { o.classList.add('wrong'); o.querySelector('.bullet').textContent = '✕'; }
     });
 
     if (userVal === rightVal) score++;
   });
 
+  const isPass = score >= PASS_THRESHOLD;
+  const pct    = Math.round(score / 5 * 100);
+
   // Disable button
-  const btn = document.getElementById('btn-' + m);
+  const btn = document.getElementById('sbtn-' + m);
   btn.disabled = true;
-  btn.textContent = 'Submitted';
+  btn.textContent = 'Submitted ✓';
 
   // Show result
-  const pct = Math.round((score / 5) * 100);
-  const pass = score >= 4;
-  const resultEl = document.getElementById('result-' + m);
-  resultEl.style.display = 'block';
-  resultEl.className = 'quiz-result ' + (pass ? 'result-pass' : 'result-fail');
-  resultEl.innerHTML = `
-    <div class="result-score">${score}/5</div>
-    <div class="result-label">${pct}% score</div>
-    <div class="result-bar"><div class="result-fill" id="fill-${m}" style="width:0%"></div></div>
-    <div class="result-msg">${pass ? '✓ Passed — well done!' : '✗ Needs Review — score below passing threshold (4/5)'}</div>
-    <div class="result-sub">${pass
-      ? 'You have demonstrated a good understanding of this module.'
-      : 'Please re-watch the video and review the guide, then try again.'}</div>
-    <div class="result-sending" id="send-status-${m}">Sending results…</div>
-  `;
-  resultEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const resEl = document.getElementById('qres-' + m);
+  resEl.style.display = 'block';
+  resEl.className = 'quiz-result ' + (isPass ? 'result-pass' : 'result-fail');
+
+  const fillId = 'rf-' + m;
+  resEl.innerHTML = (isPass
+    ? '<div class="r-score">' + score + '/5</div>'
+    : '<div class="r-score">' + score + '/5</div>') +
+    '<div class="r-label">' + pct + '% — ' + (isPass ? 'PASSED' : 'DID NOT PASS') + '</div>' +
+    '<div class="r-bar"><div class="r-fill" id="' + fillId + '" style="width:0%"></div></div>' +
+    '<div class="r-msg">' + (isPass
+      ? '✓ Well done! You can now proceed to the next module.'
+      : '✗ You need 3/5 to pass. Review the material and try again.') + '</div>' +
+    '<div class="r-sub">' + (isPass
+      ? 'The next module tab is now unlocked.'
+      : 'Re-read the guide above, then refresh the page to retry.') + '</div>' +
+    '<div class="r-sending" id="rs-' + m + '">Sending results…</div>';
+
+  // Animate bar
   setTimeout(() => {
-    const fill = document.getElementById('fill-' + m);
+    const fill = document.getElementById(fillId);
     if (fill) fill.style.width = pct + '%';
   }, 100);
 
-  // Send to Apps Script
-  const payload = {
-    module: 'Module 0' + m,
-    name, email, score,
-    total: 5,
-    pct,
-    passed: pass,
-    timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-  };
+  // Show next button if passed
+  if (isPass) {
+    const nextBtn = document.getElementById('next-' + m);
+    if (nextBtn) { nextBtn.style.display = 'block'; resEl.appendChild(nextBtn); }
+    if (!passed.includes(m)) {
+      passed.push(m);
+      localStorage.setItem('kt_passed', JSON.stringify(passed));
+    }
+    if (m < TOTAL_MODULES) unlockTab(m + 1);
+    updateProgress();
 
-  if (APPS_SCRIPT_URL !== 'PASTE_YOUR_APPS_SCRIPT_URL_HERE') {
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).then(() => {
-      const s = document.getElementById('send-status-' + m);
-      if (s) s.textContent = '✓ Results recorded successfully';
-    }).catch(() => {
-      const s = document.getElementById('send-status-' + m);
-      if (s) s.textContent = 'Could not connect to tracking server';
-    });
+    // If final module
+    if (m === TOTAL_MODULES) {
+      resEl.innerHTML += '<div style="margin-top:20px; padding:20px; background:var(--success-dim); border:1px solid var(--success); border-radius:10px; text-align:center;">' +
+        '<div style="font-size:32px; margin-bottom:8px;">🎉</div>' +
+        '<div style="font-size:16px; font-weight:700; color:var(--success);">Training Complete!</div>' +
+        '<div style="font-size:13px; color:var(--muted); margin-top:6px;">You have successfully completed all 6 modules of the NxtWave Events Training Hub.</div>' +
+        '</div>';
+    }
+  }
+
+  // Send to Apps Script
+  sendResult(m, name, email, score, pct, isPass);
+}
+
+// ── UNLOCK TAB ──
+function unlockTab(m) {
+  const btn = document.querySelector('[data-m="' + m + '"]');
+  if (!btn) return;
+  btn.classList.remove('locked');
+  if (passed.includes(m)) {
+    btn.classList.add('done');
+    document.getElementById('tnum-' + m).innerHTML = 'MODULE ' + String(m).padStart(2,'0');
   } else {
-    const s = document.getElementById('send-status-' + m);
-    if (s) s.textContent = '⚠ Tracking not yet configured — quiz scores are local only';
+    document.getElementById('tnum-' + m).innerHTML = 'MODULE ' + String(m).padStart(2,'0');
   }
 }
+
+// ── PROGRESS BAR ──
+function updateProgress() {
+  const count = passed.length;
+  const pct   = Math.round(count / TOTAL_MODULES * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-text').textContent = count + ' of ' + TOTAL_MODULES + ' modules completed';
+  document.getElementById('prog-pct').textContent  = pct + '%';
+
+  // Mark done tabs
+  passed.forEach(m => {
+    const btn = document.querySelector('[data-m="' + m + '"]');
+    if (btn) btn.classList.add('done');
+  });
+}
+
+// ── SEND RESULT ──
+function sendResult(m, name, email, score, pct, isPass) {
+  if (APPS_SCRIPT_URL === 'PASTE_YOUR_APPS_SCRIPT_URL_HERE') {
+    const s = document.getElementById('rs-' + m);
+    if (s) s.textContent = '⚠ Tracking not configured yet';
+    return;
+  }
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      module: 'Module ' + String(m).padStart(2,'0'), name, email,
+      score, total: 5, pct, passed: isPass,
+      timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+    })
+  }).then(() => {
+    const s = document.getElementById('rs-' + m);
+    if (s) s.textContent = '✓ Results recorded';
+  }).catch(() => {
+    const s = document.getElementById('rs-' + m);
+    if (s) s.textContent = 'Could not connect to tracking server';
+  });
+}
+
+init();
 </script>
 </body>
 </html>
