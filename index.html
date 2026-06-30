@@ -1467,24 +1467,35 @@ function submitQuiz(m) {
   btn.disabled = true;
   btn.textContent = 'Submitted ✓';
 
+  // Build next button label
+  const MOD_NAMES = ['','Create Event','Registration Form','Submission Form','Approve & Reject','Event Certificates','Event Pass'];
+  const nextLabel = m < TOTAL_MODULES
+    ? 'Continue to Module ' + String(m+1).padStart(2,'0') + ' — ' + MOD_NAMES[m+1] + ' →'
+    : '';
+
   // Show result
   const resEl = document.getElementById('qres-' + m);
   resEl.style.display = 'block';
   resEl.className = 'quiz-result ' + (isPass ? 'result-pass' : 'result-fail');
 
   const fillId = 'rf-' + m;
-  resEl.innerHTML = (isPass
-    ? '<div class="r-score">' + score + '/6</div>'
-    : '<div class="r-score">' + score + '/6</div>') +
+  resEl.innerHTML =
+    '<div class="r-score">' + score + '/6</div>' +
     '<div class="r-label">' + pct + '% — ' + (isPass ? 'PASSED' : 'DID NOT PASS') + '</div>' +
     '<div class="r-bar"><div class="r-fill" id="' + fillId + '" style="width:0%"></div></div>' +
     '<div class="r-msg">' + (isPass
-      ? '✓ Well done! You can now proceed to the next module.'
+      ? '✓ Well done! You passed this module.'
       : '✗ You need 3/6 to pass. Review the material and try again.') + '</div>' +
     '<div class="r-sub">' + (isPass
-      ? 'The next module tab is now unlocked.'
+      ? (m < TOTAL_MODULES ? 'The next module is now unlocked.' : 'You have completed all modules!')
       : 'Re-read the guide above and try again.') + '</div>' +
+    (isPass && m < TOTAL_MODULES
+      ? '<button class="next-btn" style="display:block" onclick="goModule(' + (m+1) + ')">' + nextLabel + '</button>'
+      : '') +
     (!isPass ? '<button class="retry-btn" onclick="retryQuiz(' + m + ')">↺ Retry Quiz</button>' : '') +
+    (isPass && m === TOTAL_MODULES
+      ? '<div style="margin-top:20px;padding:20px;background:var(--success-dim);border:1px solid var(--success);border-radius:10px;text-align:center;"><div style="font-size:32px;margin-bottom:8px;">🎉</div><div style="font-size:16px;font-weight:700;color:var(--success);">Training Complete!</div><div style="font-size:13px;color:var(--muted);margin-top:6px;">You have successfully completed all 6 modules of the NxtWave Events Training Hub.</div></div>'
+      : '') +
     '<div class="r-sending" id="rs-' + m + '">Sending results…</div>';
 
   // Animate bar
@@ -1493,25 +1504,14 @@ function submitQuiz(m) {
     if (fill) fill.style.width = pct + '%';
   }, 100);
 
-  // Show next button if passed
+  // Save progress and unlock next tab
   if (isPass) {
-    const nextBtn = document.getElementById('next-' + m);
-    if (nextBtn) { nextBtn.style.display = 'block'; resEl.appendChild(nextBtn); }
     if (!passed.includes(m)) {
       passed.push(m);
       localStorage.setItem('kt_passed', JSON.stringify(passed));
     }
     if (m < TOTAL_MODULES) unlockTab(m + 1);
     updateProgress();
-
-    // If final module
-    if (m === TOTAL_MODULES) {
-      resEl.innerHTML += '<div style="margin-top:20px; padding:20px; background:var(--success-dim); border:1px solid var(--success); border-radius:10px; text-align:center;">' +
-        '<div style="font-size:32px; margin-bottom:8px;">🎉</div>' +
-        '<div style="font-size:16px; font-weight:700; color:var(--success);">Training Complete!</div>' +
-        '<div style="font-size:13px; color:var(--muted); margin-top:6px;">You have successfully completed all 6 modules of the NxtWave Events Training Hub.</div>' +
-        '</div>';
-    }
   }
 
   // Send to Apps Script
