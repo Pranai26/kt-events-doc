@@ -171,8 +171,10 @@ pre  { background: var(--surface-3); border: 1px solid var(--border); border-rad
 .result-pass .r-fill  { background: var(--success); }
 .result-fail .r-fill  { background: var(--danger); }
 
-.next-btn { display: none; margin-top: 18px; width: 100%; padding: 13px; background: var(--success); color: #fff; font-size: 14px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; font-family: var(--font-body); transition: opacity .2s; }
-.next-btn:hover { opacity: .9; }
+.next-btn  { display: none; margin-top: 18px; width: 100%; padding: 13px; background: var(--success); color: #fff; font-size: 14px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; font-family: var(--font-body); transition: opacity .2s; }
+.next-btn:hover  { opacity: .9; }
+.retry-btn { display: block; margin-top: 14px; width: 100%; padding: 13px; background: none; border: 2px solid var(--accent); color: var(--accent); font-size: 14px; font-weight: 700; border-radius: 8px; cursor: pointer; font-family: var(--font-body); transition: background .2s, color .2s; }
+.retry-btn:hover { background: var(--accent); color: #0D1B2A; }
 .r-sending { font-size: 12px; color: var(--muted); font-family: var(--font-mono); margin-top: 10px; }
 
 /* OVERVIEW GRID */
@@ -1358,6 +1360,36 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5LxGDIZn42WIf
 let passed = JSON.parse(localStorage.getItem('kt_passed') || '[]');
 
 // ── INIT ──
+function retryQuiz(m) {
+  const correct = ANS[m];
+  const qKeys   = Object.keys(correct);
+
+  // Unlock all options and clear selections
+  qKeys.forEach(qk => {
+    const group = document.getElementById(qk);
+    group.querySelectorAll('.q-opt').forEach(o => {
+      o.classList.remove('selected', 'correct', 'wrong', 'locked-opt');
+      o.onclick = (function(el, g, v){ return function(){ pick(el, g, v); }; })(o, qk, o.dataset.val);
+      const bullet = o.querySelector('.bullet');
+      if (bullet) bullet.textContent = '';
+    });
+  });
+
+  // Re-enable submit button
+  const btn = document.getElementById('sbtn-' + m);
+  btn.disabled = false;
+  btn.textContent = 'Submit Quiz';
+
+  // Hide result panel
+  const resEl = document.getElementById('qres-' + m);
+  resEl.style.display = 'none';
+  resEl.className = 'quiz-result';
+  resEl.innerHTML = '';
+
+  // Scroll up to the quiz
+  document.getElementById('qres-' + m).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function resetProgress() {
   if (confirm('Reset all your quiz progress? You will start from Module 01 again.')) {
     localStorage.removeItem('kt_passed');
@@ -1451,7 +1483,8 @@ function submitQuiz(m) {
       : '✗ You need 3/6 to pass. Review the material and try again.') + '</div>' +
     '<div class="r-sub">' + (isPass
       ? 'The next module tab is now unlocked.'
-      : 'Re-read the guide above, then refresh the page to retry.') + '</div>' +
+      : 'Re-read the guide above and try again.') + '</div>' +
+    (!isPass ? '<button class="retry-btn" onclick="retryQuiz(' + m + ')">↺ Retry Quiz</button>' : '') +
     '<div class="r-sending" id="rs-' + m + '">Sending results…</div>';
 
   // Animate bar
