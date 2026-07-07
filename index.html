@@ -1364,15 +1364,32 @@ function retryQuiz(m) {
   const correct = ANS[m];
   const qKeys   = Object.keys(correct);
 
-  // Unlock all options and clear selections
-  qKeys.forEach(qk => {
+  qKeys.forEach((qk, idx) => {
     const group = document.getElementById(qk);
+
+    // Unlock and reset each option
     group.querySelectorAll('.q-opt').forEach(o => {
       o.classList.remove('selected', 'correct', 'wrong', 'locked-opt');
       o.onclick = (function(el, g, v){ return function(){ pick(el, g, v); }; })(o, qk, o.dataset.val);
       const bullet = o.querySelector('.bullet');
       if (bullet) bullet.textContent = '';
     });
+
+    // Shuffle option order (Fisher-Yates)
+    const opts = Array.from(group.querySelectorAll('.q-opt'));
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    opts.forEach(o => group.appendChild(o));
+
+    // Reset question label back to plain Q# / 6
+    const qBlock = group.closest('.q-block');
+    const qNumEl = qBlock ? qBlock.querySelector('.q-num') : null;
+    if (qNumEl) {
+      qNumEl.innerHTML = 'Q' + (idx + 1) + ' / 6';
+      qNumEl.style.color = '';
+    }
   });
 
   // Re-enable submit button
@@ -1386,8 +1403,9 @@ function retryQuiz(m) {
   resEl.className = 'quiz-result';
   resEl.innerHTML = '';
 
-  // Scroll up to the quiz
-  document.getElementById('qres-' + m).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Scroll to top of quiz
+  const quizSection = document.querySelector('#module-' + m + ' .quiz-section');
+  if (quizSection) quizSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function resetProgress() {
@@ -1442,21 +1460,34 @@ function submitQuiz(m) {
 
   // Score
   let score = 0;
-  qKeys.forEach(qk => {
+  qKeys.forEach((qk, idx) => {
     const group   = document.getElementById(qk);
     const opts    = group.querySelectorAll('.q-opt');
     const selOpt  = group.querySelector('.selected');
     const userVal = selOpt ? selOpt.dataset.val : null;
     const rightVal= correct[qk];
+    const isRight = userVal === rightVal;
 
+    // Lock all options — no green/red highlighting, answer stays hidden
     opts.forEach(o => {
       o.classList.add('locked-opt');
       o.onclick = null;
-      if (o.dataset.val === rightVal) { o.classList.add('correct'); o.querySelector('.bullet').textContent = '✓'; }
-      if (o === selOpt && userVal !== rightVal) { o.classList.add('wrong'); o.querySelector('.bullet').textContent = '✕'; }
     });
 
-    if (userVal === rightVal) score++;
+    // Mark the question label ✓ or ✗ only (not the options)
+    const qBlock  = group.closest('.q-block');
+    const qNumEl  = qBlock ? qBlock.querySelector('.q-num') : null;
+    if (qNumEl) {
+      if (isRight) {
+        qNumEl.innerHTML = '✓ Q' + (idx + 1) + ' / 6';
+        qNumEl.style.color = 'var(--success)';
+      } else {
+        qNumEl.innerHTML = '✗ Q' + (idx + 1) + ' / 6';
+        qNumEl.style.color = 'var(--danger)';
+      }
+    }
+
+    if (isRight) score++;
   });
 
   const isPass = score >= PASS_THRESHOLD;
