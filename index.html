@@ -29,6 +29,26 @@
   --font-body:    'Inter', 'Segoe UI', system-ui, sans-serif;
   --font-mono:    'Cascadia Code','Consolas','Courier New',monospace;
 }
+[data-theme="dark"] {
+  --ground:       #0D1117;
+  --surface:      #161B22;
+  --surface-2:    #1C2330;
+  --surface-3:    #222C3C;
+  --text:         #E6EDF3;
+  --muted:        #8B949E;
+  --accent:       #F0B429;
+  --accent-dark:  #D49A20;
+  --accent-dim:   rgba(240,180,41,0.12);
+  --accent-2:     #58A6FF;
+  --accent-2-dim: rgba(88,166,255,0.10);
+  --danger:       #F85149;
+  --danger-dim:   rgba(248,81,73,0.12);
+  --success:      #3FB950;
+  --success-dim:  rgba(63,185,80,0.12);
+  --border:       rgba(255,255,255,0.08);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.3), 0 1px 8px rgba(0,0,0,0.2);
+  --shadow-md:    0 4px 12px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+}
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body { background: var(--ground); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.7; }
@@ -37,7 +57,22 @@ body { background: var(--ground); color: var(--text); font-family: var(--font-bo
 .wrap { max-width: 920px; margin: 0 auto; padding: 0 28px; }
 
 /* HERO */
-.hero-wrap { background: linear-gradient(135deg, #1D3A8A 0%, #1E40AF 50%, #1D4ED8 100%); }
+.hero-wrap { background: linear-gradient(135deg, #1D3A8A 0%, #1E40AF 50%, #1D4ED8 100%); position: relative; }
+[data-theme="dark"] .hero-wrap { background: linear-gradient(135deg, #0D1117 0%, #161B22 60%, #1C2330 100%); }
+
+/* THEME TOGGLE */
+.theme-toggle {
+  position: absolute; top: 16px; right: 28px;
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 100px; padding: 6px 14px 6px 10px;
+  cursor: pointer; font-family: var(--font-body); font-size: 12px;
+  font-weight: 600; color: rgba(255,255,255,0.85);
+  backdrop-filter: blur(8px); transition: all .2s; user-select: none;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.2); color: #fff; }
+.theme-toggle .tog-icon { font-size: 15px; line-height: 1; transition: transform .35s; }
+[data-theme="dark"] .theme-toggle .tog-icon { transform: rotate(360deg); }
 .hero { padding: 48px 0 36px; }
 .hero-eye { font-family: var(--font-mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,0.65); display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .hero-eye::before { content:''; width:6px; height:6px; background:#F0B429; border-radius:50%; }
@@ -194,7 +229,26 @@ pre  { background: #1E293B; border-radius: 10px; padding: 16px 18px; font-family
   .hero-title  { font-size: 24px; }
   .sec-title   { font-size: 21px; }
   .wrap { padding: 0 16px; }
+  .theme-toggle { top: 12px; right: 14px; }
 }
+
+/* DARK THEME OVERRIDES for hardcoded-color elements */
+[data-theme="dark"] .quiz-header { background: linear-gradient(135deg, #1C2330 0%, #222C3C 100%); border-bottom: 1px solid var(--border); }
+[data-theme="dark"] .quiz-header h3 { color: var(--text); }
+[data-theme="dark"] .quiz-header p  { color: var(--muted); }
+[data-theme="dark"] .quiz-intro { background: rgba(88,166,255,0.07); border-color: rgba(88,166,255,0.2); color: var(--accent-2); }
+[data-theme="dark"] .submit-btn { background: linear-gradient(135deg, #1C2330, #2C3E55); border: 1px solid rgba(88,166,255,0.3); color: var(--accent-2); }
+[data-theme="dark"] .submit-btn:hover { background: linear-gradient(135deg, #2C3E55, #3A4F6A); box-shadow: 0 4px 12px rgba(88,166,255,0.2); }
+[data-theme="dark"] .tab-nav { background: var(--surface); border-bottom-color: var(--border); }
+[data-theme="dark"] .callout.warn   { background: rgba(240,180,41,0.08);  }
+[data-theme="dark"] .callout.info   { background: rgba(88,166,255,0.07);  }
+[data-theme="dark"] .callout.danger { background: rgba(248,81,73,0.08);   }
+[data-theme="dark"] .callout.ok     { background: rgba(63,185,80,0.08);   }
+[data-theme="dark"] .step-num { background: linear-gradient(180deg, rgba(88,166,255,0.08), rgba(88,166,255,0.04)); color: var(--accent-2); }
+[data-theme="dark"] .q-opt:hover { border-color: rgba(88,166,255,0.4); background: var(--surface-3); }
+[data-theme="dark"] .q-opt.selected { background: rgba(88,166,255,0.08); box-shadow: 0 0 0 3px rgba(88,166,255,0.12); }
+[data-theme="dark"] .quiz-result { background: var(--surface-2); }
+[data-theme="dark"] pre { background: #0D1117; color: #79C0FF; }
 </style>
 </head>
 <body>
@@ -202,6 +256,10 @@ pre  { background: #1E293B; border-radius: 10px; padding: 16px 18px; font-family
 
 <!-- HERO -->
 <div class="hero-wrap">
+<button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Switch theme">
+  <span class="tog-icon" id="tog-icon">🌙</span>
+  <span id="tog-label">Dark Mode</span>
+</button>
 <div class="wrap">
 <div class="hero">
   <div class="hero-eye">NxtWave · NKB Admin Panel</div>
@@ -1416,6 +1474,21 @@ function retryQuiz(m) {
   if (quizSection) quizSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// ── THEME TOGGLE ──
+function applyTheme(dark) {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  const icon  = document.getElementById('tog-icon');
+  const label = document.getElementById('tog-label');
+  if (icon)  icon.textContent  = dark ? '☀️' : '🌙';
+  if (label) label.textContent = dark ? 'Light Mode' : 'Dark Mode';
+}
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = !isDark;
+  localStorage.setItem('kt_theme', next ? 'dark' : 'light');
+  applyTheme(next);
+}
+
 function fillSavedDetails() {
   const savedName  = localStorage.getItem('kt_name')  || '';
   const savedEmail = localStorage.getItem('kt_email') || '';
@@ -1437,6 +1510,8 @@ function resetProgress() {
 }
 
 function init() {
+  const savedTheme = localStorage.getItem('kt_theme') || 'light';
+  applyTheme(savedTheme === 'dark');
   passed.forEach(m => unlockTab(m));
   updateProgress();
   fillSavedDetails();
